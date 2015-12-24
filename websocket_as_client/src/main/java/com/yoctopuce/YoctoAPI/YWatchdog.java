@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YWatchdog.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindWatchdog(), the high-level API for Watchdog functions
  *
@@ -175,6 +175,15 @@ public class YWatchdog extends YFunction
         _className = "Watchdog";
         //--- (YWatchdog attributes initialization)
         //--- (end of YWatchdog attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YWatchdog(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YWatchdog implementation)
@@ -1003,9 +1012,44 @@ public class YWatchdog extends YFunction
     public static YWatchdog FindWatchdog(String func)
     {
         YWatchdog obj;
-        obj = (YWatchdog) YFunction._FindFromCache(YAPI.GetYCtx(), "Watchdog", func);
+        obj = (YWatchdog) YFunction._FindFromCache("Watchdog", func);
         if (obj == null) {
-            obj = new YWatchdog(YAPI.GetYCtx(), func);
+            obj = new YWatchdog(func);
+            YFunction._AddToCache("Watchdog", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a watchdog for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the watchdog is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YWatchdog.isOnline() to test if the watchdog is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a watchdog by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the watchdog
+     *
+     * @return a YWatchdog object allowing you to drive the watchdog.
+     */
+    public static YWatchdog FindWatchdogInContext(YAPIContext yctx,String func)
+    {
+        YWatchdog obj;
+        obj = (YWatchdog) YFunction._FindFromCache(yctx, "Watchdog", func);
+        if (obj == null) {
+            obj = new YWatchdog(yctx, func);
             YFunction._AddToCache("Watchdog", func, obj);
         }
         return obj;
@@ -1069,41 +1113,7 @@ public class YWatchdog extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindWatchdog(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a watchdog for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the watchdog is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YWatchdog.isOnline() to test if the watchdog is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a watchdog by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the watchdog
-     *
-     * @return a YWatchdog object allowing you to drive the watchdog.
-     */
-    public static YWatchdog FindWatchdog(String func, YAPIContext yapi_obj)
-    {
-        YWatchdog obj;
-        obj = (YWatchdog) YFunction._FindFromCache(yapi_obj, "Watchdog", func);
-        if (obj == null) {
-            obj = new YWatchdog(yapi_obj, func);
-            YFunction._AddToCache("Watchdog", func, obj);
-        }
-        return obj;
+        return FindWatchdogInContext(_yapi, next_hwid);
     }
 
     /**
@@ -1120,7 +1130,7 @@ public class YWatchdog extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Watchdog");
         if (next_hwid == null)  return null;
-        return FindWatchdog(next_hwid, yctx);
+        return FindWatchdogInContext(yctx, next_hwid);
     }
 
     /**
@@ -1128,15 +1138,17 @@ public class YWatchdog extends YFunction
      * Use the method YWatchdog.nextWatchdog() to iterate on
      * next watchdog.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YWatchdog object, corresponding to
      *         the first watchdog currently online, or a null pointer
      *         if there are none.
      */
-    public static YWatchdog FirstWatchdog(YAPIContext yapi)
+    public static YWatchdog FirstWatchdogInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Watchdog");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Watchdog");
         if (next_hwid == null)  return null;
-        return FindWatchdog(next_hwid, yapi);
+        return FindWatchdogInContext(yctx, next_hwid);
     }
 
     //--- (end of YWatchdog implementation)

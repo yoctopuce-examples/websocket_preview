@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YSensor.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YSensor.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindSensor(), the high-level API for Sensor functions
  *
@@ -274,6 +274,10 @@ public class YSensor extends YFunction
         _className = "Sensor";
         //--- (generated code: YSensor attributes initialization)
         //--- (end of generated code: YSensor attributes initialization)
+    }
+    protected YSensor(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
 
@@ -844,9 +848,44 @@ public class YSensor extends YFunction
     public static YSensor FindSensor(String func)
     {
         YSensor obj;
-        obj = (YSensor) YFunction._FindFromCache(YAPI.GetYCtx(), "Sensor", func);
+        obj = (YSensor) YFunction._FindFromCache("Sensor", func);
         if (obj == null) {
-            obj = new YSensor(YAPI.GetYCtx(), func);
+            obj = new YSensor(func);
+            YFunction._AddToCache("Sensor", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YSensor.isOnline() to test if the sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the sensor
+     *
+     * @return a YSensor object allowing you to drive the sensor.
+     */
+    public static YSensor FindSensorInContext(YAPIContext yctx,String func)
+    {
+        YSensor obj;
+        obj = (YSensor) YFunction._FindFromCache(yctx, "Sensor", func);
+        if (obj == null) {
+            obj = new YSensor(yctx, func);
             YFunction._AddToCache("Sensor", func, obj);
         }
         return obj;
@@ -1469,41 +1508,7 @@ public class YSensor extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindSensor(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YSensor.isOnline() to test if the sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the sensor
-     *
-     * @return a YSensor object allowing you to drive the sensor.
-     */
-    public static YSensor FindSensor(String func, YAPIContext yapi_obj)
-    {
-        YSensor obj;
-        obj = (YSensor) YFunction._FindFromCache(yapi_obj, "Sensor", func);
-        if (obj == null) {
-            obj = new YSensor(yapi_obj, func);
-            YFunction._AddToCache("Sensor", func, obj);
-        }
-        return obj;
+        return FindSensorInContext(_yapi, next_hwid);
     }
 
     /**
@@ -1520,7 +1525,7 @@ public class YSensor extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Sensor");
         if (next_hwid == null)  return null;
-        return FindSensor(next_hwid, yctx);
+        return FindSensorInContext(yctx, next_hwid);
     }
 
     /**
@@ -1528,15 +1533,17 @@ public class YSensor extends YFunction
      * Use the method YSensor.nextSensor() to iterate on
      * next sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YSensor object, corresponding to
      *         the first sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YSensor FirstSensor(YAPIContext yapi)
+    public static YSensor FirstSensorInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Sensor");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Sensor");
         if (next_hwid == null)  return null;
-        return FindSensor(next_hwid, yapi);
+        return FindSensorInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YSensor implementation)

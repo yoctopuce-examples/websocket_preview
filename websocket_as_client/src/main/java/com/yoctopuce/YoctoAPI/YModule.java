@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: YModule.java 22366 2015-12-15 23:05:04Z mvuilleu $
+ * $Id: YModule.java 22530 2015-12-24 10:52:06Z seb $
  *
  * YModule Class: Module control interface
  *
@@ -189,6 +189,12 @@ public class YModule extends YFunction
         //--- (generated code: YModule attributes initialization)
         //--- (end of generated code: YModule attributes initialization)
     }
+
+    protected YModule(String func)
+    {
+        this(YAPI.GetYCtx(),func);
+    }
+
 
     /**
      * Returns the number of functions (beside the "module" interface) available on the module.
@@ -889,9 +895,44 @@ public class YModule extends YFunction
     public static YModule FindModule(String func)
     {
         YModule obj;
-        obj = (YModule) YFunction._FindFromCache(YAPI.GetYCtx(), "Module", func);
+        obj = (YModule) YFunction._FindFromCache("Module", func);
         if (obj == null) {
-            obj = new YModule(YAPI.GetYCtx(), func);
+            obj = new YModule(func);
+            YFunction._AddToCache("Module", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a module for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the module is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YModule.isOnline() to test if the module is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a module by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the module
+     *
+     * @return a YModule object allowing you to drive the module.
+     */
+    public static YModule FindModuleInContext(YAPIContext yctx,String func)
+    {
+        YModule obj;
+        obj = (YModule) YFunction._FindFromCache(yctx, "Module", func);
+        if (obj == null) {
+            obj = new YModule(yctx, func);
             YFunction._AddToCache("Module", func, obj);
         }
         return obj;
@@ -1047,7 +1088,7 @@ public class YModule extends YFunction
             _throw(YAPI.IO_ERROR, "Unable to get device settings");
             settings = "error:Unable to get device settings".getBytes();
         }
-        return new YFirmwareUpdate(serial, path, settings, _yapi);
+        return new YFirmwareUpdate(_yapi, serial, path, settings);
     }
 
     /**
@@ -1828,35 +1869,7 @@ public class YModule extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindModule(next_hwid, _yapi);
-    }
-
-    /**
-     * Allows you to find a module from its serial number or from its logical name.
-     *
-     * This function does not require that the module is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YModule.isOnline() to test if the module is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a module by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string containing either the serial number or
-     *         the logical name of the desired module
-     *
-     * @return a YModule object allowing you to drive the module
-     *         or get additional information on the module.
-     */
-    public static YModule FindModule(String func, YAPIContext yapi_obj)
-    {
-        YModule obj;
-        obj = (YModule) YFunction._FindFromCache(yapi_obj, "Module", func);
-        if (obj == null) {
-            obj = new YModule(yapi_obj, func);
-            YFunction._AddToCache("Module", func, obj);
-        }
-        return obj;
+        return FindModuleInContext(_yapi, next_hwid);
     }
 
     /**
@@ -1873,23 +1886,17 @@ public class YModule extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Module");
         if (next_hwid == null)  return null;
-        return FindModule(next_hwid, yctx);
+        return FindModuleInContext(yctx, next_hwid);
     }
 
     /**
-     * Starts the enumeration of modules currently accessible.
-     * Use the method YModule.nextModule() to iterate on the
-     * next modules.
-     *
-     * @return a pointer to a YModule object, corresponding to
-     *         the first module currently online, or a null pointer
-     *         if there are none.
+     * comment from .yc definition
      */
-    public static YModule FirstModule(YAPIContext yapi)
+    public static YModule FirstModuleInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Module");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Module");
         if (next_hwid == null)  return null;
-        return FindModule(next_hwid, yapi);
+        return FindModuleInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YModule implementation)

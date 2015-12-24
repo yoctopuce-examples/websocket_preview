@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YWakeUpMonitor.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindWakeUpMonitor(), the high-level API for WakeUpMonitor functions
  *
@@ -134,6 +134,15 @@ public class YWakeUpMonitor extends YFunction
         _className = "WakeUpMonitor";
         //--- (YWakeUpMonitor attributes initialization)
         //--- (end of YWakeUpMonitor attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YWakeUpMonitor(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YWakeUpMonitor implementation)
@@ -467,9 +476,44 @@ public class YWakeUpMonitor extends YFunction
     public static YWakeUpMonitor FindWakeUpMonitor(String func)
     {
         YWakeUpMonitor obj;
-        obj = (YWakeUpMonitor) YFunction._FindFromCache(YAPI.GetYCtx(), "WakeUpMonitor", func);
+        obj = (YWakeUpMonitor) YFunction._FindFromCache("WakeUpMonitor", func);
         if (obj == null) {
-            obj = new YWakeUpMonitor(YAPI.GetYCtx(), func);
+            obj = new YWakeUpMonitor(func);
+            YFunction._AddToCache("WakeUpMonitor", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a monitor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the monitor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YWakeUpMonitor.isOnline() to test if the monitor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a monitor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the monitor
+     *
+     * @return a YWakeUpMonitor object allowing you to drive the monitor.
+     */
+    public static YWakeUpMonitor FindWakeUpMonitorInContext(YAPIContext yctx,String func)
+    {
+        YWakeUpMonitor obj;
+        obj = (YWakeUpMonitor) YFunction._FindFromCache(yctx, "WakeUpMonitor", func);
+        if (obj == null) {
+            obj = new YWakeUpMonitor(yctx, func);
             YFunction._AddToCache("WakeUpMonitor", func, obj);
         }
         return obj;
@@ -618,41 +662,7 @@ public class YWakeUpMonitor extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindWakeUpMonitor(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a monitor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the monitor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YWakeUpMonitor.isOnline() to test if the monitor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a monitor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the monitor
-     *
-     * @return a YWakeUpMonitor object allowing you to drive the monitor.
-     */
-    public static YWakeUpMonitor FindWakeUpMonitor(String func, YAPIContext yapi_obj)
-    {
-        YWakeUpMonitor obj;
-        obj = (YWakeUpMonitor) YFunction._FindFromCache(yapi_obj, "WakeUpMonitor", func);
-        if (obj == null) {
-            obj = new YWakeUpMonitor(yapi_obj, func);
-            YFunction._AddToCache("WakeUpMonitor", func, obj);
-        }
-        return obj;
+        return FindWakeUpMonitorInContext(_yapi, next_hwid);
     }
 
     /**
@@ -669,7 +679,7 @@ public class YWakeUpMonitor extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("WakeUpMonitor");
         if (next_hwid == null)  return null;
-        return FindWakeUpMonitor(next_hwid, yctx);
+        return FindWakeUpMonitorInContext(yctx, next_hwid);
     }
 
     /**
@@ -677,15 +687,17 @@ public class YWakeUpMonitor extends YFunction
      * Use the method YWakeUpMonitor.nextWakeUpMonitor() to iterate on
      * next monitors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YWakeUpMonitor object, corresponding to
      *         the first monitor currently online, or a null pointer
      *         if there are none.
      */
-    public static YWakeUpMonitor FirstWakeUpMonitor(YAPIContext yapi)
+    public static YWakeUpMonitor FirstWakeUpMonitorInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("WakeUpMonitor");
+        String next_hwid = yctx._yHash.getFirstHardwareId("WakeUpMonitor");
         if (next_hwid == null)  return null;
-        return FindWakeUpMonitor(next_hwid, yapi);
+        return FindWakeUpMonitorInContext(yctx, next_hwid);
     }
 
     //--- (end of YWakeUpMonitor implementation)

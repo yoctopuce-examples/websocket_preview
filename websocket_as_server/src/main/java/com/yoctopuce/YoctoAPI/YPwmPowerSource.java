@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YPwmPowerSource.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindPwmPowerSource(), the high-level API for PwmPowerSource functions
  *
@@ -104,6 +104,15 @@ public class YPwmPowerSource extends YFunction
         _className = "PwmPowerSource";
         //--- (YPwmPowerSource attributes initialization)
         //--- (end of YPwmPowerSource attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YPwmPowerSource(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YPwmPowerSource implementation)
@@ -219,9 +228,44 @@ public class YPwmPowerSource extends YFunction
     public static YPwmPowerSource FindPwmPowerSource(String func)
     {
         YPwmPowerSource obj;
-        obj = (YPwmPowerSource) YFunction._FindFromCache(YAPI.GetYCtx(), "PwmPowerSource", func);
+        obj = (YPwmPowerSource) YFunction._FindFromCache("PwmPowerSource", func);
         if (obj == null) {
-            obj = new YPwmPowerSource(YAPI.GetYCtx(), func);
+            obj = new YPwmPowerSource(func);
+            YFunction._AddToCache("PwmPowerSource", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a voltage source for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the voltage source is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YPwmPowerSource.isOnline() to test if the voltage source is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a voltage source by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the voltage source
+     *
+     * @return a YPwmPowerSource object allowing you to drive the voltage source.
+     */
+    public static YPwmPowerSource FindPwmPowerSourceInContext(YAPIContext yctx,String func)
+    {
+        YPwmPowerSource obj;
+        obj = (YPwmPowerSource) YFunction._FindFromCache(yctx, "PwmPowerSource", func);
+        if (obj == null) {
+            obj = new YPwmPowerSource(yctx, func);
             YFunction._AddToCache("PwmPowerSource", func, obj);
         }
         return obj;
@@ -285,41 +329,7 @@ public class YPwmPowerSource extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindPwmPowerSource(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a voltage source for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the voltage source is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YPwmPowerSource.isOnline() to test if the voltage source is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a voltage source by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the voltage source
-     *
-     * @return a YPwmPowerSource object allowing you to drive the voltage source.
-     */
-    public static YPwmPowerSource FindPwmPowerSource(String func, YAPIContext yapi_obj)
-    {
-        YPwmPowerSource obj;
-        obj = (YPwmPowerSource) YFunction._FindFromCache(yapi_obj, "PwmPowerSource", func);
-        if (obj == null) {
-            obj = new YPwmPowerSource(yapi_obj, func);
-            YFunction._AddToCache("PwmPowerSource", func, obj);
-        }
-        return obj;
+        return FindPwmPowerSourceInContext(_yapi, next_hwid);
     }
 
     /**
@@ -336,7 +346,7 @@ public class YPwmPowerSource extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("PwmPowerSource");
         if (next_hwid == null)  return null;
-        return FindPwmPowerSource(next_hwid, yctx);
+        return FindPwmPowerSourceInContext(yctx, next_hwid);
     }
 
     /**
@@ -344,15 +354,17 @@ public class YPwmPowerSource extends YFunction
      * Use the method YPwmPowerSource.nextPwmPowerSource() to iterate on
      * next Voltage sources.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YPwmPowerSource object, corresponding to
      *         the first source currently online, or a null pointer
      *         if there are none.
      */
-    public static YPwmPowerSource FirstPwmPowerSource(YAPIContext yapi)
+    public static YPwmPowerSource FirstPwmPowerSourceInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("PwmPowerSource");
+        String next_hwid = yctx._yHash.getFirstHardwareId("PwmPowerSource");
         if (next_hwid == null)  return null;
-        return FindPwmPowerSource(next_hwid, yapi);
+        return FindPwmPowerSourceInContext(yctx, next_hwid);
     }
 
     //--- (end of YPwmPowerSource implementation)

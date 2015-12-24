@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YServo.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindServo(), the high-level API for Servo functions
  *
@@ -141,6 +141,15 @@ public class YServo extends YFunction
         _className = "Servo";
         //--- (YServo attributes initialization)
         //--- (end of YServo attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YServo(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YServo implementation)
@@ -651,9 +660,44 @@ public class YServo extends YFunction
     public static YServo FindServo(String func)
     {
         YServo obj;
-        obj = (YServo) YFunction._FindFromCache(YAPI.GetYCtx(), "Servo", func);
+        obj = (YServo) YFunction._FindFromCache("Servo", func);
         if (obj == null) {
-            obj = new YServo(YAPI.GetYCtx(), func);
+            obj = new YServo(func);
+            YFunction._AddToCache("Servo", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a servo for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the servo is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YServo.isOnline() to test if the servo is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a servo by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the servo
+     *
+     * @return a YServo object allowing you to drive the servo.
+     */
+    public static YServo FindServoInContext(YAPIContext yctx,String func)
+    {
+        YServo obj;
+        obj = (YServo) YFunction._FindFromCache(yctx, "Servo", func);
+        if (obj == null) {
+            obj = new YServo(yctx, func);
             YFunction._AddToCache("Servo", func, obj);
         }
         return obj;
@@ -717,41 +761,7 @@ public class YServo extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindServo(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a servo for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the servo is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YServo.isOnline() to test if the servo is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a servo by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the servo
-     *
-     * @return a YServo object allowing you to drive the servo.
-     */
-    public static YServo FindServo(String func, YAPIContext yapi_obj)
-    {
-        YServo obj;
-        obj = (YServo) YFunction._FindFromCache(yapi_obj, "Servo", func);
-        if (obj == null) {
-            obj = new YServo(yapi_obj, func);
-            YFunction._AddToCache("Servo", func, obj);
-        }
-        return obj;
+        return FindServoInContext(_yapi, next_hwid);
     }
 
     /**
@@ -768,7 +778,7 @@ public class YServo extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Servo");
         if (next_hwid == null)  return null;
-        return FindServo(next_hwid, yctx);
+        return FindServoInContext(yctx, next_hwid);
     }
 
     /**
@@ -776,15 +786,17 @@ public class YServo extends YFunction
      * Use the method YServo.nextServo() to iterate on
      * next servos.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YServo object, corresponding to
      *         the first servo currently online, or a null pointer
      *         if there are none.
      */
-    public static YServo FirstServo(YAPIContext yapi)
+    public static YServo FirstServoInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Servo");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Servo");
         if (next_hwid == null)  return null;
-        return FindServo(next_hwid, yapi);
+        return FindServoInContext(yctx, next_hwid);
     }
 
     //--- (end of YServo implementation)

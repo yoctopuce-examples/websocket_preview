@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: YFunction.java 22469 2015-12-18 11:01:00Z seb $
+ * $Id: YFunction.java 22530 2015-12-24 10:52:06Z seb $
  *
  * YFunction Class (virtual class, used internally)
  *
@@ -139,6 +139,20 @@ public class YFunction
         //--- (end of generated code: YFunction attributes initialization)
     }
 
+    public YFunction(String func)
+    {
+        _yapi = YAPI.GetYCtx();
+        _className = "Function";
+        _func = func;
+        _lastErrorType = YAPI.SUCCESS;
+        _lastErrorMsg = "";
+        _userData = null;
+        _dataStreams = new HashMap<String, YDataStream>();
+        //--- (generated code: YFunction attributes initialization)
+        //--- (end of generated code: YFunction attributes initialization)
+
+    }
+
     protected void _throw(int error, String message) throws YAPI_Exception
     {
         throw new YAPI_Exception(error, message);
@@ -148,6 +162,13 @@ public class YFunction
     {
         return yctx._yHash.getFunction(className, func);
     }
+
+    protected static YFunction _FindFromCache(String className, String func)
+    {
+        YAPIContext ctx = YAPI.GetYCtx();
+        return ctx._yHash.getFunction(className, func);
+    }
+
 
     protected static void _AddToCache(String className, String func, YFunction obj)
     {
@@ -314,9 +335,44 @@ public class YFunction
     public static YFunction FindFunction(String func)
     {
         YFunction obj;
-        obj = (YFunction) YFunction._FindFromCache(YAPI.GetYCtx(), "Function", func);
+        obj = (YFunction) YFunction._FindFromCache("Function", func);
         if (obj == null) {
-            obj = new YFunction(YAPI.GetYCtx(), func);
+            obj = new YFunction(func);
+            YFunction._AddToCache("Function", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a function for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the function is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YFunction.isOnline() to test if the function is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a function by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the function
+     *
+     * @return a YFunction object allowing you to drive the function.
+     */
+    public static YFunction FindFunctionInContext(YAPIContext yctx,String func)
+    {
+        YFunction obj;
+        obj = (YFunction) YFunction._FindFromCache(yctx, "Function", func);
+        if (obj == null) {
+            obj = new YFunction(yctx, func);
             YFunction._AddToCache("Function", func, obj);
         }
         return obj;
@@ -410,41 +466,7 @@ public class YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindFunction(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a function for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the function is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YFunction.isOnline() to test if the function is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a function by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the function
-     *
-     * @return a YFunction object allowing you to drive the function.
-     */
-    public static YFunction FindFunction(String func, YAPIContext yapi_obj)
-    {
-        YFunction obj;
-        obj = (YFunction) YFunction._FindFromCache(yapi_obj, "Function", func);
-        if (obj == null) {
-            obj = new YFunction(yapi_obj, func);
-            YFunction._AddToCache("Function", func, obj);
-        }
-        return obj;
+        return FindFunctionInContext(_yapi, next_hwid);
     }
 
     /**
@@ -455,17 +477,17 @@ public class YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Function");
         if (next_hwid == null)  return null;
-        return FindFunction(next_hwid, yctx);
+        return FindFunctionInContext(yctx, next_hwid);
     }
 
     /**
      * comment from .yc definition
      */
-    public static YFunction FirstFunction(YAPIContext yapi)
+    public static YFunction FirstFunctionInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Function");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Function");
         if (next_hwid == null)  return null;
-        return FindFunction(next_hwid, yapi);
+        return FindFunctionInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YFunction implementation)
@@ -559,7 +581,7 @@ public class YFunction
                 return _logicalName + ".module";
         } else {
             String moduleHwId = _yapi._yHash.resolveHwID("Module", _serial);
-            YModule module = YModule.FindModule(moduleHwId, _yapi);
+            YModule module = YModule.FindModuleInContext(_yapi, moduleHwId);
             String modname = module.get_logicalName();
             if (modname.equals("")) {
                 modname = module.get_serialNumber();
@@ -1030,12 +1052,12 @@ public class YFunction
     {
         // try to resolve the function name to a device id without query
         if (_serial != null && !_serial.equals("")) {
-            return YModule.FindModule(_serial + ".module", _yapi);
+            return YModule.FindModuleInContext(_yapi, _serial + ".module");
         }
         if (_func.indexOf('.') == -1) {
             try {
                 String serial = _yapi._yHash.resolveSerial(_className, _func);
-                return YModule.FindModule(serial + ".module", _yapi);
+                return YModule.FindModuleInContext(_yapi, serial + ".module");
             } catch (YAPI_Exception ignored) {
             }
         }
@@ -1043,12 +1065,12 @@ public class YFunction
             // device not resolved for now, force a communication for a last chance resolution
             if (load(YAPI.DefaultCacheValidity) == YAPI.SUCCESS) {
                 String serial = _yapi._yHash.resolveSerial(_className, _func);
-                return YModule.FindModule(serial + ".module", _yapi);
+                return YModule.FindModuleInContext(_yapi, serial + ".module");
             }
         } catch (YAPI_Exception ignored) {
         }
         // return a true yFindModule object even if it is not a module valid for communicating
-        return YModule.FindModule("module_of_" + _className + "_" + _func, _yapi);
+        return YModule.FindModuleInContext(_yapi, "module_of_" + _className + "_" + _func);
     }
 
     public YModule getModule()

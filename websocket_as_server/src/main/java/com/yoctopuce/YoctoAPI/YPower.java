@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YPower.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindPower(), the high-level API for Power functions
  *
@@ -113,6 +113,15 @@ public class YPower extends YSensor
         _className = "Power";
         //--- (YPower attributes initialization)
         //--- (end of YPower attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YPower(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YPower implementation)
@@ -265,9 +274,44 @@ public class YPower extends YSensor
     public static YPower FindPower(String func)
     {
         YPower obj;
-        obj = (YPower) YFunction._FindFromCache(YAPI.GetYCtx(), "Power", func);
+        obj = (YPower) YFunction._FindFromCache("Power", func);
         if (obj == null) {
-            obj = new YPower(YAPI.GetYCtx(), func);
+            obj = new YPower(func);
+            YFunction._AddToCache("Power", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a electrical power sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the electrical power sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YPower.isOnline() to test if the electrical power sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a electrical power sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the electrical power sensor
+     *
+     * @return a YPower object allowing you to drive the electrical power sensor.
+     */
+    public static YPower FindPowerInContext(YAPIContext yctx,String func)
+    {
+        YPower obj;
+        obj = (YPower) YFunction._FindFromCache(yctx, "Power", func);
+        if (obj == null) {
+            obj = new YPower(yctx, func);
             YFunction._AddToCache("Power", func, obj);
         }
         return obj;
@@ -376,41 +420,7 @@ public class YPower extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindPower(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a electrical power sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the electrical power sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YPower.isOnline() to test if the electrical power sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a electrical power sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the electrical power sensor
-     *
-     * @return a YPower object allowing you to drive the electrical power sensor.
-     */
-    public static YPower FindPower(String func, YAPIContext yapi_obj)
-    {
-        YPower obj;
-        obj = (YPower) YFunction._FindFromCache(yapi_obj, "Power", func);
-        if (obj == null) {
-            obj = new YPower(yapi_obj, func);
-            YFunction._AddToCache("Power", func, obj);
-        }
-        return obj;
+        return FindPowerInContext(_yapi, next_hwid);
     }
 
     /**
@@ -427,7 +437,7 @@ public class YPower extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Power");
         if (next_hwid == null)  return null;
-        return FindPower(next_hwid, yctx);
+        return FindPowerInContext(yctx, next_hwid);
     }
 
     /**
@@ -435,15 +445,17 @@ public class YPower extends YSensor
      * Use the method YPower.nextPower() to iterate on
      * next electrical power sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YPower object, corresponding to
      *         the first electrical power sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YPower FirstPower(YAPIContext yapi)
+    public static YPower FirstPowerInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Power");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Power");
         if (next_hwid == null)  return null;
-        return FindPower(next_hwid, yapi);
+        return FindPowerInContext(yctx, next_hwid);
     }
 
     //--- (end of YPower implementation)

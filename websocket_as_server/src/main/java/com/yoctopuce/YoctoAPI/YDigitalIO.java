@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YDigitalIO.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindDigitalIO(), the high-level API for DigitalIO functions
  *
@@ -135,6 +135,15 @@ public class YDigitalIO extends YFunction
         _className = "DigitalIO";
         //--- (YDigitalIO attributes initialization)
         //--- (end of YDigitalIO attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YDigitalIO(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YDigitalIO implementation)
@@ -582,9 +591,44 @@ public class YDigitalIO extends YFunction
     public static YDigitalIO FindDigitalIO(String func)
     {
         YDigitalIO obj;
-        obj = (YDigitalIO) YFunction._FindFromCache(YAPI.GetYCtx(), "DigitalIO", func);
+        obj = (YDigitalIO) YFunction._FindFromCache("DigitalIO", func);
         if (obj == null) {
-            obj = new YDigitalIO(YAPI.GetYCtx(), func);
+            obj = new YDigitalIO(func);
+            YFunction._AddToCache("DigitalIO", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a digital IO port for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the digital IO port is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YDigitalIO.isOnline() to test if the digital IO port is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a digital IO port by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the digital IO port
+     *
+     * @return a YDigitalIO object allowing you to drive the digital IO port.
+     */
+    public static YDigitalIO FindDigitalIOInContext(YAPIContext yctx,String func)
+    {
+        YDigitalIO obj;
+        obj = (YDigitalIO) YFunction._FindFromCache(yctx, "DigitalIO", func);
+        if (obj == null) {
+            obj = new YDigitalIO(yctx, func);
             YFunction._AddToCache("DigitalIO", func, obj);
         }
         return obj;
@@ -837,41 +881,7 @@ public class YDigitalIO extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindDigitalIO(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a digital IO port for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the digital IO port is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YDigitalIO.isOnline() to test if the digital IO port is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a digital IO port by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the digital IO port
-     *
-     * @return a YDigitalIO object allowing you to drive the digital IO port.
-     */
-    public static YDigitalIO FindDigitalIO(String func, YAPIContext yapi_obj)
-    {
-        YDigitalIO obj;
-        obj = (YDigitalIO) YFunction._FindFromCache(yapi_obj, "DigitalIO", func);
-        if (obj == null) {
-            obj = new YDigitalIO(yapi_obj, func);
-            YFunction._AddToCache("DigitalIO", func, obj);
-        }
-        return obj;
+        return FindDigitalIOInContext(_yapi, next_hwid);
     }
 
     /**
@@ -888,7 +898,7 @@ public class YDigitalIO extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("DigitalIO");
         if (next_hwid == null)  return null;
-        return FindDigitalIO(next_hwid, yctx);
+        return FindDigitalIOInContext(yctx, next_hwid);
     }
 
     /**
@@ -896,15 +906,17 @@ public class YDigitalIO extends YFunction
      * Use the method YDigitalIO.nextDigitalIO() to iterate on
      * next digital IO ports.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YDigitalIO object, corresponding to
      *         the first digital IO port currently online, or a null pointer
      *         if there are none.
      */
-    public static YDigitalIO FirstDigitalIO(YAPIContext yapi)
+    public static YDigitalIO FirstDigitalIOInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("DigitalIO");
+        String next_hwid = yctx._yHash.getFirstHardwareId("DigitalIO");
         if (next_hwid == null)  return null;
-        return FindDigitalIO(next_hwid, yapi);
+        return FindDigitalIOInContext(yctx, next_hwid);
     }
 
     //--- (end of YDigitalIO implementation)

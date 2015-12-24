@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YQuadratureDecoder.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindQuadratureDecoder(), the high-level API for QuadratureDecoder functions
  *
@@ -109,6 +109,15 @@ public class YQuadratureDecoder extends YSensor
         _className = "QuadratureDecoder";
         //--- (YQuadratureDecoder attributes initialization)
         //--- (end of YQuadratureDecoder attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YQuadratureDecoder(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YQuadratureDecoder implementation)
@@ -276,9 +285,44 @@ public class YQuadratureDecoder extends YSensor
     public static YQuadratureDecoder FindQuadratureDecoder(String func)
     {
         YQuadratureDecoder obj;
-        obj = (YQuadratureDecoder) YFunction._FindFromCache(YAPI.GetYCtx(), "QuadratureDecoder", func);
+        obj = (YQuadratureDecoder) YFunction._FindFromCache("QuadratureDecoder", func);
         if (obj == null) {
-            obj = new YQuadratureDecoder(YAPI.GetYCtx(), func);
+            obj = new YQuadratureDecoder(func);
+            YFunction._AddToCache("QuadratureDecoder", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a quadrature decoder for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the quadrature decoder is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YQuadratureDecoder.isOnline() to test if the quadrature decoder is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a quadrature decoder by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the quadrature decoder
+     *
+     * @return a YQuadratureDecoder object allowing you to drive the quadrature decoder.
+     */
+    public static YQuadratureDecoder FindQuadratureDecoderInContext(YAPIContext yctx,String func)
+    {
+        YQuadratureDecoder obj;
+        obj = (YQuadratureDecoder) YFunction._FindFromCache(yctx, "QuadratureDecoder", func);
+        if (obj == null) {
+            obj = new YQuadratureDecoder(yctx, func);
             YFunction._AddToCache("QuadratureDecoder", func, obj);
         }
         return obj;
@@ -375,41 +419,7 @@ public class YQuadratureDecoder extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindQuadratureDecoder(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a quadrature decoder for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the quadrature decoder is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YQuadratureDecoder.isOnline() to test if the quadrature decoder is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a quadrature decoder by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the quadrature decoder
-     *
-     * @return a YQuadratureDecoder object allowing you to drive the quadrature decoder.
-     */
-    public static YQuadratureDecoder FindQuadratureDecoder(String func, YAPIContext yapi_obj)
-    {
-        YQuadratureDecoder obj;
-        obj = (YQuadratureDecoder) YFunction._FindFromCache(yapi_obj, "QuadratureDecoder", func);
-        if (obj == null) {
-            obj = new YQuadratureDecoder(yapi_obj, func);
-            YFunction._AddToCache("QuadratureDecoder", func, obj);
-        }
-        return obj;
+        return FindQuadratureDecoderInContext(_yapi, next_hwid);
     }
 
     /**
@@ -426,7 +436,7 @@ public class YQuadratureDecoder extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("QuadratureDecoder");
         if (next_hwid == null)  return null;
-        return FindQuadratureDecoder(next_hwid, yctx);
+        return FindQuadratureDecoderInContext(yctx, next_hwid);
     }
 
     /**
@@ -434,15 +444,17 @@ public class YQuadratureDecoder extends YSensor
      * Use the method YQuadratureDecoder.nextQuadratureDecoder() to iterate on
      * next quadrature decoders.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YQuadratureDecoder object, corresponding to
      *         the first quadrature decoder currently online, or a null pointer
      *         if there are none.
      */
-    public static YQuadratureDecoder FirstQuadratureDecoder(YAPIContext yapi)
+    public static YQuadratureDecoder FirstQuadratureDecoderInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("QuadratureDecoder");
+        String next_hwid = yctx._yHash.getFirstHardwareId("QuadratureDecoder");
         if (next_hwid == null)  return null;
-        return FindQuadratureDecoder(next_hwid, yapi);
+        return FindQuadratureDecoderInContext(yctx, next_hwid);
     }
 
     //--- (end of YQuadratureDecoder implementation)

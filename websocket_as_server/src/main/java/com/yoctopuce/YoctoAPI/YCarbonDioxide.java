@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YCarbonDioxide.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindCarbonDioxide(), the high-level API for CarbonDioxide functions
  *
@@ -108,6 +108,15 @@ public class YCarbonDioxide extends YSensor
         _className = "CarbonDioxide";
         //--- (YCarbonDioxide attributes initialization)
         //--- (end of YCarbonDioxide attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YCarbonDioxide(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YCarbonDioxide implementation)
@@ -253,9 +262,44 @@ public class YCarbonDioxide extends YSensor
     public static YCarbonDioxide FindCarbonDioxide(String func)
     {
         YCarbonDioxide obj;
-        obj = (YCarbonDioxide) YFunction._FindFromCache(YAPI.GetYCtx(), "CarbonDioxide", func);
+        obj = (YCarbonDioxide) YFunction._FindFromCache("CarbonDioxide", func);
         if (obj == null) {
-            obj = new YCarbonDioxide(YAPI.GetYCtx(), func);
+            obj = new YCarbonDioxide(func);
+            YFunction._AddToCache("CarbonDioxide", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a CO2 sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the CO2 sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YCarbonDioxide.isOnline() to test if the CO2 sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a CO2 sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the CO2 sensor
+     *
+     * @return a YCarbonDioxide object allowing you to drive the CO2 sensor.
+     */
+    public static YCarbonDioxide FindCarbonDioxideInContext(YAPIContext yctx,String func)
+    {
+        YCarbonDioxide obj;
+        obj = (YCarbonDioxide) YFunction._FindFromCache(yctx, "CarbonDioxide", func);
+        if (obj == null) {
+            obj = new YCarbonDioxide(yctx, func);
             YFunction._AddToCache("CarbonDioxide", func, obj);
         }
         return obj;
@@ -392,41 +436,7 @@ public class YCarbonDioxide extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindCarbonDioxide(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a CO2 sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the CO2 sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YCarbonDioxide.isOnline() to test if the CO2 sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a CO2 sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the CO2 sensor
-     *
-     * @return a YCarbonDioxide object allowing you to drive the CO2 sensor.
-     */
-    public static YCarbonDioxide FindCarbonDioxide(String func, YAPIContext yapi_obj)
-    {
-        YCarbonDioxide obj;
-        obj = (YCarbonDioxide) YFunction._FindFromCache(yapi_obj, "CarbonDioxide", func);
-        if (obj == null) {
-            obj = new YCarbonDioxide(yapi_obj, func);
-            YFunction._AddToCache("CarbonDioxide", func, obj);
-        }
-        return obj;
+        return FindCarbonDioxideInContext(_yapi, next_hwid);
     }
 
     /**
@@ -443,7 +453,7 @@ public class YCarbonDioxide extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("CarbonDioxide");
         if (next_hwid == null)  return null;
-        return FindCarbonDioxide(next_hwid, yctx);
+        return FindCarbonDioxideInContext(yctx, next_hwid);
     }
 
     /**
@@ -451,15 +461,17 @@ public class YCarbonDioxide extends YSensor
      * Use the method YCarbonDioxide.nextCarbonDioxide() to iterate on
      * next CO2 sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YCarbonDioxide object, corresponding to
      *         the first CO2 sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YCarbonDioxide FirstCarbonDioxide(YAPIContext yapi)
+    public static YCarbonDioxide FirstCarbonDioxideInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("CarbonDioxide");
+        String next_hwid = yctx._yHash.getFirstHardwareId("CarbonDioxide");
         if (next_hwid == null)  return null;
-        return FindCarbonDioxide(next_hwid, yapi);
+        return FindCarbonDioxideInContext(yctx, next_hwid);
     }
 
     //--- (end of YCarbonDioxide implementation)

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YWireless.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YWireless.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindWireless(), the high-level API for Wireless functions
  *
@@ -132,6 +132,12 @@ public class YWireless extends YFunction
         //--- (generated code: YWireless attributes initialization)
         //--- (end of generated code: YWireless attributes initialization)
     }
+
+    protected YWireless(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
 
     //--- (generated code: YWireless implementation)
     @Override
@@ -368,9 +374,44 @@ public class YWireless extends YFunction
     public static YWireless FindWireless(String func)
     {
         YWireless obj;
-        obj = (YWireless) YFunction._FindFromCache(YAPI.GetYCtx(), "Wireless", func);
+        obj = (YWireless) YFunction._FindFromCache("Wireless", func);
         if (obj == null) {
-            obj = new YWireless(YAPI.GetYCtx(), func);
+            obj = new YWireless(func);
+            YFunction._AddToCache("Wireless", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a wireless lan interface for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the wireless lan interface is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YWireless.isOnline() to test if the wireless lan interface is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a wireless lan interface by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the wireless lan interface
+     *
+     * @return a YWireless object allowing you to drive the wireless lan interface.
+     */
+    public static YWireless FindWirelessInContext(YAPIContext yctx,String func)
+    {
+        YWireless obj;
+        obj = (YWireless) YFunction._FindFromCache(yctx, "Wireless", func);
+        if (obj == null) {
+            obj = new YWireless(yctx, func);
             YFunction._AddToCache("Wireless", func, obj);
         }
         return obj;
@@ -525,41 +566,7 @@ public class YWireless extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindWireless(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a wireless lan interface for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the wireless lan interface is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YWireless.isOnline() to test if the wireless lan interface is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a wireless lan interface by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the wireless lan interface
-     *
-     * @return a YWireless object allowing you to drive the wireless lan interface.
-     */
-    public static YWireless FindWireless(String func, YAPIContext yapi_obj)
-    {
-        YWireless obj;
-        obj = (YWireless) YFunction._FindFromCache(yapi_obj, "Wireless", func);
-        if (obj == null) {
-            obj = new YWireless(yapi_obj, func);
-            YFunction._AddToCache("Wireless", func, obj);
-        }
-        return obj;
+        return FindWirelessInContext(_yapi, next_hwid);
     }
 
     /**
@@ -576,7 +583,7 @@ public class YWireless extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Wireless");
         if (next_hwid == null)  return null;
-        return FindWireless(next_hwid, yctx);
+        return FindWirelessInContext(yctx, next_hwid);
     }
 
     /**
@@ -584,15 +591,17 @@ public class YWireless extends YFunction
      * Use the method YWireless.nextWireless() to iterate on
      * next wireless lan interfaces.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YWireless object, corresponding to
      *         the first wireless lan interface currently online, or a null pointer
      *         if there are none.
      */
-    public static YWireless FirstWireless(YAPIContext yapi)
+    public static YWireless FirstWirelessInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Wireless");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Wireless");
         if (next_hwid == null)  return null;
-        return FindWireless(next_hwid, yapi);
+        return FindWirelessInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YWireless implementation)

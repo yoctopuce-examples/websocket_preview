@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YFirmwareUpdate.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YFirmwareUpdate.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindFirmwareUpdate(), the high-level API for FirmwareUpdate functions
  *
@@ -189,7 +189,8 @@ public class YFirmwareUpdate
     }
 
 
-    public YFirmwareUpdate(String serial, String path, byte[] settings, YAPIContext yctx)
+
+    public YFirmwareUpdate(YAPIContext yctx, String serial, String path, byte[] settings)
     {
         _serial = serial;
         _firmwarepath = path;
@@ -198,6 +199,7 @@ public class YFirmwareUpdate
         //--- (generated code: YFirmwareUpdate attributes initialization)
         //--- (end of generated code: YFirmwareUpdate attributes initialization)
     }
+
 
 
     private void _progress(int progress, String msg)
@@ -232,7 +234,7 @@ public class YFirmwareUpdate
                                 //5% -> 10%
                                 _progress(5, "check if module is already in bootloader");
                                 YGenericHub hub = null;
-                                YModule module = YModule.FindModule(_serial + ".module", _yctx);
+                                YModule module = YModule.FindModuleInContext(_yctx, _serial + ".module");
                                 if (module.isOnline()) {
                                     YDevice yDevice = module.getYDevice();
                                     hub = yDevice.getHub();
@@ -380,6 +382,9 @@ public class YFirmwareUpdate
 
     //cannot be generated for Java:
     //public static ArrayList<String> GetAllBootLoaders()
+
+    //cannot be generated for Java:
+    //public static ArrayList<String> GetAllBootLoadersInContext(YAPIContext yctx)
 
     //cannot be generated for Java:
     //public static String CheckFirmware(String serial,String path,int minrelease)

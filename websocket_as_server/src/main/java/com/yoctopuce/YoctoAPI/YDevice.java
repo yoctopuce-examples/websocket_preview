@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: YDevice.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YDevice.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Internal YDevice class
  *
@@ -305,7 +305,7 @@ public class YDevice
             String logs = resultStr.substring(0, pos);
             String posStr = resultStr.substring(pos + 1);
             _logpos = Integer.valueOf(posStr);
-            YModule module = YModule.FindModule(getSerialNumber(), _hub._yctx);
+            YModule module = YModule.FindModuleInContext(_hub._yctx, getSerialNumber());
             String[] lines = logs.split("\n");
             for (String line : lines) {
                 _logCallback.logCallback(module, line);

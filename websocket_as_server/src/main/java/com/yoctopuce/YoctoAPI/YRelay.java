@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YRelay.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindRelay(), the high-level API for Relay functions
  *
@@ -152,6 +152,15 @@ public class YRelay extends YFunction
         _className = "Relay";
         //--- (YRelay attributes initialization)
         //--- (end of YRelay attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YRelay(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YRelay implementation)
@@ -701,9 +710,44 @@ public class YRelay extends YFunction
     public static YRelay FindRelay(String func)
     {
         YRelay obj;
-        obj = (YRelay) YFunction._FindFromCache(YAPI.GetYCtx(), "Relay", func);
+        obj = (YRelay) YFunction._FindFromCache("Relay", func);
         if (obj == null) {
-            obj = new YRelay(YAPI.GetYCtx(), func);
+            obj = new YRelay(func);
+            YFunction._AddToCache("Relay", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a relay for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the relay is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YRelay.isOnline() to test if the relay is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a relay by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the relay
+     *
+     * @return a YRelay object allowing you to drive the relay.
+     */
+    public static YRelay FindRelayInContext(YAPIContext yctx,String func)
+    {
+        YRelay obj;
+        obj = (YRelay) YFunction._FindFromCache(yctx, "Relay", func);
+        if (obj == null) {
+            obj = new YRelay(yctx, func);
             YFunction._AddToCache("Relay", func, obj);
         }
         return obj;
@@ -767,41 +811,7 @@ public class YRelay extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindRelay(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a relay for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the relay is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YRelay.isOnline() to test if the relay is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a relay by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the relay
-     *
-     * @return a YRelay object allowing you to drive the relay.
-     */
-    public static YRelay FindRelay(String func, YAPIContext yapi_obj)
-    {
-        YRelay obj;
-        obj = (YRelay) YFunction._FindFromCache(yapi_obj, "Relay", func);
-        if (obj == null) {
-            obj = new YRelay(yapi_obj, func);
-            YFunction._AddToCache("Relay", func, obj);
-        }
-        return obj;
+        return FindRelayInContext(_yapi, next_hwid);
     }
 
     /**
@@ -818,7 +828,7 @@ public class YRelay extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Relay");
         if (next_hwid == null)  return null;
-        return FindRelay(next_hwid, yctx);
+        return FindRelayInContext(yctx, next_hwid);
     }
 
     /**
@@ -826,15 +836,17 @@ public class YRelay extends YFunction
      * Use the method YRelay.nextRelay() to iterate on
      * next relays.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YRelay object, corresponding to
      *         the first relay currently online, or a null pointer
      *         if there are none.
      */
-    public static YRelay FirstRelay(YAPIContext yapi)
+    public static YRelay FirstRelayInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Relay");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Relay");
         if (next_hwid == null)  return null;
-        return FindRelay(next_hwid, yapi);
+        return FindRelayInContext(yctx, next_hwid);
     }
 
     //--- (end of YRelay implementation)

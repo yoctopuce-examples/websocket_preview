@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YDataLogger.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YDataLogger.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindDataLogger(), the high-level API for DataLogger functions
  *
@@ -174,6 +174,10 @@ public class YDataLogger extends YFunction
         //--- (end of generated code: YDataLogger attributes initialization)
     }
 
+    protected YDataLogger(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
 
     /**
      * Builds a list of all data streams hold by the data logger (legacy method).
@@ -609,9 +613,44 @@ public class YDataLogger extends YFunction
     public static YDataLogger FindDataLogger(String func)
     {
         YDataLogger obj;
-        obj = (YDataLogger) YFunction._FindFromCache(YAPI.GetYCtx(), "DataLogger", func);
+        obj = (YDataLogger) YFunction._FindFromCache("DataLogger", func);
         if (obj == null) {
-            obj = new YDataLogger(YAPI.GetYCtx(), func);
+            obj = new YDataLogger(func);
+            YFunction._AddToCache("DataLogger", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a data logger for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the data logger is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YDataLogger.isOnline() to test if the data logger is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a data logger by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the data logger
+     *
+     * @return a YDataLogger object allowing you to drive the data logger.
+     */
+    public static YDataLogger FindDataLoggerInContext(YAPIContext yctx,String func)
+    {
+        YDataLogger obj;
+        obj = (YDataLogger) YFunction._FindFromCache(yctx, "DataLogger", func);
+        if (obj == null) {
+            obj = new YDataLogger(yctx, func);
             YFunction._AddToCache("DataLogger", func, obj);
         }
         return obj;
@@ -721,41 +760,7 @@ public class YDataLogger extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindDataLogger(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a data logger for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the data logger is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YDataLogger.isOnline() to test if the data logger is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a data logger by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the data logger
-     *
-     * @return a YDataLogger object allowing you to drive the data logger.
-     */
-    public static YDataLogger FindDataLogger(String func, YAPIContext yapi_obj)
-    {
-        YDataLogger obj;
-        obj = (YDataLogger) YFunction._FindFromCache(yapi_obj, "DataLogger", func);
-        if (obj == null) {
-            obj = new YDataLogger(yapi_obj, func);
-            YFunction._AddToCache("DataLogger", func, obj);
-        }
-        return obj;
+        return FindDataLoggerInContext(_yapi, next_hwid);
     }
 
     /**
@@ -772,7 +777,7 @@ public class YDataLogger extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("DataLogger");
         if (next_hwid == null)  return null;
-        return FindDataLogger(next_hwid, yctx);
+        return FindDataLoggerInContext(yctx, next_hwid);
     }
 
     /**
@@ -780,15 +785,17 @@ public class YDataLogger extends YFunction
      * Use the method YDataLogger.nextDataLogger() to iterate on
      * next data loggers.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YDataLogger object, corresponding to
      *         the first data logger currently online, or a null pointer
      *         if there are none.
      */
-    public static YDataLogger FirstDataLogger(YAPIContext yapi)
+    public static YDataLogger FirstDataLoggerInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("DataLogger");
+        String next_hwid = yctx._yHash.getFirstHardwareId("DataLogger");
         if (next_hwid == null)  return null;
-        return FindDataLogger(next_hwid, yapi);
+        return FindDataLoggerInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YDataLogger implementation)

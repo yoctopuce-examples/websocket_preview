@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YGenericSensor.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindGenericSensor(), the high-level API for GenericSensor functions
  *
@@ -133,6 +133,15 @@ public class YGenericSensor extends YSensor
         _className = "GenericSensor";
         //--- (YGenericSensor attributes initialization)
         //--- (end of YGenericSensor attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YGenericSensor(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YGenericSensor implementation)
@@ -557,9 +566,44 @@ public class YGenericSensor extends YSensor
     public static YGenericSensor FindGenericSensor(String func)
     {
         YGenericSensor obj;
-        obj = (YGenericSensor) YFunction._FindFromCache(YAPI.GetYCtx(), "GenericSensor", func);
+        obj = (YGenericSensor) YFunction._FindFromCache("GenericSensor", func);
         if (obj == null) {
-            obj = new YGenericSensor(YAPI.GetYCtx(), func);
+            obj = new YGenericSensor(func);
+            YFunction._AddToCache("GenericSensor", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a generic sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the generic sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YGenericSensor.isOnline() to test if the generic sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a generic sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the generic sensor
+     *
+     * @return a YGenericSensor object allowing you to drive the generic sensor.
+     */
+    public static YGenericSensor FindGenericSensorInContext(YAPIContext yctx,String func)
+    {
+        YGenericSensor obj;
+        obj = (YGenericSensor) YFunction._FindFromCache(yctx, "GenericSensor", func);
+        if (obj == null) {
+            obj = new YGenericSensor(yctx, func);
             YFunction._AddToCache("GenericSensor", func, obj);
         }
         return obj;
@@ -673,41 +717,7 @@ public class YGenericSensor extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindGenericSensor(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a generic sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the generic sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YGenericSensor.isOnline() to test if the generic sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a generic sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the generic sensor
-     *
-     * @return a YGenericSensor object allowing you to drive the generic sensor.
-     */
-    public static YGenericSensor FindGenericSensor(String func, YAPIContext yapi_obj)
-    {
-        YGenericSensor obj;
-        obj = (YGenericSensor) YFunction._FindFromCache(yapi_obj, "GenericSensor", func);
-        if (obj == null) {
-            obj = new YGenericSensor(yapi_obj, func);
-            YFunction._AddToCache("GenericSensor", func, obj);
-        }
-        return obj;
+        return FindGenericSensorInContext(_yapi, next_hwid);
     }
 
     /**
@@ -724,7 +734,7 @@ public class YGenericSensor extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("GenericSensor");
         if (next_hwid == null)  return null;
-        return FindGenericSensor(next_hwid, yctx);
+        return FindGenericSensorInContext(yctx, next_hwid);
     }
 
     /**
@@ -732,15 +742,17 @@ public class YGenericSensor extends YSensor
      * Use the method YGenericSensor.nextGenericSensor() to iterate on
      * next generic sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YGenericSensor object, corresponding to
      *         the first generic sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YGenericSensor FirstGenericSensor(YAPIContext yapi)
+    public static YGenericSensor FirstGenericSensorInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("GenericSensor");
+        String next_hwid = yctx._yHash.getFirstHardwareId("GenericSensor");
         if (next_hwid == null)  return null;
-        return FindGenericSensor(next_hwid, yapi);
+        return FindGenericSensorInContext(yctx, next_hwid);
     }
 
     //--- (end of YGenericSensor implementation)

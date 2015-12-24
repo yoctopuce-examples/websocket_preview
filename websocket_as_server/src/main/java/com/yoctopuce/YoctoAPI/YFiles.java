@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YFiles.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YFiles.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindFiles(), the high-level API for Files functions
  *
@@ -109,6 +109,11 @@ public class YFiles extends YFunction
         //--- (end of generated code: YFiles attributes initialization)
     }
 
+    protected YFiles(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
 
     //--- (generated code: YFiles implementation)
     @Override
@@ -207,9 +212,44 @@ public class YFiles extends YFunction
     public static YFiles FindFiles(String func)
     {
         YFiles obj;
-        obj = (YFiles) YFunction._FindFromCache(YAPI.GetYCtx(), "Files", func);
+        obj = (YFiles) YFunction._FindFromCache("Files", func);
         if (obj == null) {
-            obj = new YFiles(YAPI.GetYCtx(), func);
+            obj = new YFiles(func);
+            YFunction._AddToCache("Files", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a filesystem for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the filesystem is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YFiles.isOnline() to test if the filesystem is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a filesystem by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the filesystem
+     *
+     * @return a YFiles object allowing you to drive the filesystem.
+     */
+    public static YFiles FindFilesInContext(YAPIContext yctx,String func)
+    {
+        YFiles obj;
+        obj = (YFiles) YFunction._FindFromCache(yctx, "Files", func);
+        if (obj == null) {
+            obj = new YFiles(yctx, func);
             YFunction._AddToCache("Files", func, obj);
         }
         return obj;
@@ -380,41 +420,7 @@ public class YFiles extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindFiles(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a filesystem for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the filesystem is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YFiles.isOnline() to test if the filesystem is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a filesystem by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the filesystem
-     *
-     * @return a YFiles object allowing you to drive the filesystem.
-     */
-    public static YFiles FindFiles(String func, YAPIContext yapi_obj)
-    {
-        YFiles obj;
-        obj = (YFiles) YFunction._FindFromCache(yapi_obj, "Files", func);
-        if (obj == null) {
-            obj = new YFiles(yapi_obj, func);
-            YFunction._AddToCache("Files", func, obj);
-        }
-        return obj;
+        return FindFilesInContext(_yapi, next_hwid);
     }
 
     /**
@@ -431,7 +437,7 @@ public class YFiles extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Files");
         if (next_hwid == null)  return null;
-        return FindFiles(next_hwid, yctx);
+        return FindFilesInContext(yctx, next_hwid);
     }
 
     /**
@@ -439,15 +445,17 @@ public class YFiles extends YFunction
      * Use the method YFiles.nextFiles() to iterate on
      * next filesystems.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YFiles object, corresponding to
      *         the first filesystem currently online, or a null pointer
      *         if there are none.
      */
-    public static YFiles FirstFiles(YAPIContext yapi)
+    public static YFiles FirstFilesInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Files");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Files");
         if (next_hwid == null)  return null;
-        return FindFiles(next_hwid, yapi);
+        return FindFilesInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YFiles implementation)

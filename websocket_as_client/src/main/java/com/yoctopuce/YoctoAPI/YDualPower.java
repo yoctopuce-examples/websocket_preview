@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YDualPower.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindDualPower(), the high-level API for DualPower functions
  *
@@ -120,6 +120,15 @@ public class YDualPower extends YFunction
         _className = "DualPower";
         //--- (YDualPower attributes initialization)
         //--- (end of YDualPower attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YDualPower(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YDualPower implementation)
@@ -292,9 +301,44 @@ public class YDualPower extends YFunction
     public static YDualPower FindDualPower(String func)
     {
         YDualPower obj;
-        obj = (YDualPower) YFunction._FindFromCache(YAPI.GetYCtx(), "DualPower", func);
+        obj = (YDualPower) YFunction._FindFromCache("DualPower", func);
         if (obj == null) {
-            obj = new YDualPower(YAPI.GetYCtx(), func);
+            obj = new YDualPower(func);
+            YFunction._AddToCache("DualPower", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a dual power control for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the power control is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YDualPower.isOnline() to test if the power control is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a dual power control by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the power control
+     *
+     * @return a YDualPower object allowing you to drive the power control.
+     */
+    public static YDualPower FindDualPowerInContext(YAPIContext yctx,String func)
+    {
+        YDualPower obj;
+        obj = (YDualPower) YFunction._FindFromCache(yctx, "DualPower", func);
+        if (obj == null) {
+            obj = new YDualPower(yctx, func);
             YFunction._AddToCache("DualPower", func, obj);
         }
         return obj;
@@ -358,41 +402,7 @@ public class YDualPower extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindDualPower(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a dual power control for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the power control is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YDualPower.isOnline() to test if the power control is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a dual power control by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the power control
-     *
-     * @return a YDualPower object allowing you to drive the power control.
-     */
-    public static YDualPower FindDualPower(String func, YAPIContext yapi_obj)
-    {
-        YDualPower obj;
-        obj = (YDualPower) YFunction._FindFromCache(yapi_obj, "DualPower", func);
-        if (obj == null) {
-            obj = new YDualPower(yapi_obj, func);
-            YFunction._AddToCache("DualPower", func, obj);
-        }
-        return obj;
+        return FindDualPowerInContext(_yapi, next_hwid);
     }
 
     /**
@@ -409,7 +419,7 @@ public class YDualPower extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("DualPower");
         if (next_hwid == null)  return null;
-        return FindDualPower(next_hwid, yctx);
+        return FindDualPowerInContext(yctx, next_hwid);
     }
 
     /**
@@ -417,15 +427,17 @@ public class YDualPower extends YFunction
      * Use the method YDualPower.nextDualPower() to iterate on
      * next dual power controls.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YDualPower object, corresponding to
      *         the first dual power control currently online, or a null pointer
      *         if there are none.
      */
-    public static YDualPower FirstDualPower(YAPIContext yapi)
+    public static YDualPower FirstDualPowerInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("DualPower");
+        String next_hwid = yctx._yHash.getFirstHardwareId("DualPower");
         if (next_hwid == null)  return null;
-        return FindDualPower(next_hwid, yapi);
+        return FindDualPowerInContext(yctx, next_hwid);
     }
 
     //--- (end of YDualPower implementation)

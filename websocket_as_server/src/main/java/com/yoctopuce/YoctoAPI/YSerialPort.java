@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YSerialPort.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindSerialPort(), the high-level API for SerialPort functions
  *
@@ -167,6 +167,15 @@ public class YSerialPort extends YFunction
         _className = "SerialPort";
         //--- (YSerialPort attributes initialization)
         //--- (end of YSerialPort attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YSerialPort(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YSerialPort implementation)
@@ -824,9 +833,44 @@ public class YSerialPort extends YFunction
     public static YSerialPort FindSerialPort(String func)
     {
         YSerialPort obj;
-        obj = (YSerialPort) YFunction._FindFromCache(YAPI.GetYCtx(), "SerialPort", func);
+        obj = (YSerialPort) YFunction._FindFromCache("SerialPort", func);
         if (obj == null) {
-            obj = new YSerialPort(YAPI.GetYCtx(), func);
+            obj = new YSerialPort(func);
+            YFunction._AddToCache("SerialPort", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a serial port for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the serial port is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YSerialPort.isOnline() to test if the serial port is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a serial port by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the serial port
+     *
+     * @return a YSerialPort object allowing you to drive the serial port.
+     */
+    public static YSerialPort FindSerialPortInContext(YAPIContext yctx,String func)
+    {
+        YSerialPort obj;
+        obj = (YSerialPort) YFunction._FindFromCache(yctx, "SerialPort", func);
+        if (obj == null) {
+            obj = new YSerialPort(yctx, func);
             YFunction._AddToCache("SerialPort", func, obj);
         }
         return obj;
@@ -2043,41 +2087,7 @@ public class YSerialPort extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindSerialPort(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a serial port for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the serial port is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YSerialPort.isOnline() to test if the serial port is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a serial port by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the serial port
-     *
-     * @return a YSerialPort object allowing you to drive the serial port.
-     */
-    public static YSerialPort FindSerialPort(String func, YAPIContext yapi_obj)
-    {
-        YSerialPort obj;
-        obj = (YSerialPort) YFunction._FindFromCache(yapi_obj, "SerialPort", func);
-        if (obj == null) {
-            obj = new YSerialPort(yapi_obj, func);
-            YFunction._AddToCache("SerialPort", func, obj);
-        }
-        return obj;
+        return FindSerialPortInContext(_yapi, next_hwid);
     }
 
     /**
@@ -2094,7 +2104,7 @@ public class YSerialPort extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("SerialPort");
         if (next_hwid == null)  return null;
-        return FindSerialPort(next_hwid, yctx);
+        return FindSerialPortInContext(yctx, next_hwid);
     }
 
     /**
@@ -2102,15 +2112,17 @@ public class YSerialPort extends YFunction
      * Use the method YSerialPort.nextSerialPort() to iterate on
      * next serial ports.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YSerialPort object, corresponding to
      *         the first serial port currently online, or a null pointer
      *         if there are none.
      */
-    public static YSerialPort FirstSerialPort(YAPIContext yapi)
+    public static YSerialPort FirstSerialPortInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("SerialPort");
+        String next_hwid = yctx._yHash.getFirstHardwareId("SerialPort");
         if (next_hwid == null)  return null;
-        return FindSerialPort(next_hwid, yapi);
+        return FindSerialPortInContext(yctx, next_hwid);
     }
 
     //--- (end of YSerialPort implementation)

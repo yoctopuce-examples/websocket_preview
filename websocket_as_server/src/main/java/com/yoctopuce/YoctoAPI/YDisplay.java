@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YDisplay.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YDisplay.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindDisplay(), the high-level API for Display functions
  *
@@ -160,6 +160,11 @@ public class YDisplay extends YFunction
         _className = "Display";
         //--- (generated code: YDisplay attributes initialization)
         //--- (end of generated code: YDisplay attributes initialization)
+    }
+
+    protected YDisplay(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (generated code: YDisplay implementation)
@@ -695,9 +700,44 @@ public class YDisplay extends YFunction
     public static YDisplay FindDisplay(String func)
     {
         YDisplay obj;
-        obj = (YDisplay) YFunction._FindFromCache(YAPI.GetYCtx(), "Display", func);
+        obj = (YDisplay) YFunction._FindFromCache("Display", func);
         if (obj == null) {
-            obj = new YDisplay(YAPI.GetYCtx(), func);
+            obj = new YDisplay(func);
+            YFunction._AddToCache("Display", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a display for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the display is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YDisplay.isOnline() to test if the display is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a display by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the display
+     *
+     * @return a YDisplay object allowing you to drive the display.
+     */
+    public static YDisplay FindDisplayInContext(YAPIContext yctx,String func)
+    {
+        YDisplay obj;
+        obj = (YDisplay) YFunction._FindFromCache(yctx, "Display", func);
+        if (obj == null) {
+            obj = new YDisplay(yctx, func);
             YFunction._AddToCache("Display", func, obj);
         }
         return obj;
@@ -940,41 +980,7 @@ public class YDisplay extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindDisplay(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a display for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the display is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YDisplay.isOnline() to test if the display is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a display by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the display
-     *
-     * @return a YDisplay object allowing you to drive the display.
-     */
-    public static YDisplay FindDisplay(String func, YAPIContext yapi_obj)
-    {
-        YDisplay obj;
-        obj = (YDisplay) YFunction._FindFromCache(yapi_obj, "Display", func);
-        if (obj == null) {
-            obj = new YDisplay(yapi_obj, func);
-            YFunction._AddToCache("Display", func, obj);
-        }
-        return obj;
+        return FindDisplayInContext(_yapi, next_hwid);
     }
 
     /**
@@ -991,7 +997,7 @@ public class YDisplay extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Display");
         if (next_hwid == null)  return null;
-        return FindDisplay(next_hwid, yctx);
+        return FindDisplayInContext(yctx, next_hwid);
     }
 
     /**
@@ -999,15 +1005,17 @@ public class YDisplay extends YFunction
      * Use the method YDisplay.nextDisplay() to iterate on
      * next displays.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YDisplay object, corresponding to
      *         the first display currently online, or a null pointer
      *         if there are none.
      */
-    public static YDisplay FirstDisplay(YAPIContext yapi)
+    public static YDisplay FirstDisplayInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Display");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Display");
         if (next_hwid == null)  return null;
-        return FindDisplay(next_hwid, yapi);
+        return FindDisplayInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YDisplay implementation)

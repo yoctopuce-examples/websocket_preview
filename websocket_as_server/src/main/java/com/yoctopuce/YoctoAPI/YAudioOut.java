@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YAudioOut.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindAudioOut(), the high-level API for AudioOut functions
  *
@@ -121,6 +121,15 @@ public class YAudioOut extends YFunction
         _className = "AudioOut";
         //--- (YAudioOut attributes initialization)
         //--- (end of YAudioOut attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YAudioOut(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YAudioOut implementation)
@@ -386,9 +395,44 @@ public class YAudioOut extends YFunction
     public static YAudioOut FindAudioOut(String func)
     {
         YAudioOut obj;
-        obj = (YAudioOut) YFunction._FindFromCache(YAPI.GetYCtx(), "AudioOut", func);
+        obj = (YAudioOut) YFunction._FindFromCache("AudioOut", func);
         if (obj == null) {
-            obj = new YAudioOut(YAPI.GetYCtx(), func);
+            obj = new YAudioOut(func);
+            YFunction._AddToCache("AudioOut", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves an audio output for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the audio output is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YAudioOut.isOnline() to test if the audio output is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * an audio output by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the audio output
+     *
+     * @return a YAudioOut object allowing you to drive the audio output.
+     */
+    public static YAudioOut FindAudioOutInContext(YAPIContext yctx,String func)
+    {
+        YAudioOut obj;
+        obj = (YAudioOut) YFunction._FindFromCache(yctx, "AudioOut", func);
+        if (obj == null) {
+            obj = new YAudioOut(yctx, func);
             YFunction._AddToCache("AudioOut", func, obj);
         }
         return obj;
@@ -452,41 +496,7 @@ public class YAudioOut extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindAudioOut(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves an audio output for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the audio output is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YAudioOut.isOnline() to test if the audio output is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * an audio output by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the audio output
-     *
-     * @return a YAudioOut object allowing you to drive the audio output.
-     */
-    public static YAudioOut FindAudioOut(String func, YAPIContext yapi_obj)
-    {
-        YAudioOut obj;
-        obj = (YAudioOut) YFunction._FindFromCache(yapi_obj, "AudioOut", func);
-        if (obj == null) {
-            obj = new YAudioOut(yapi_obj, func);
-            YFunction._AddToCache("AudioOut", func, obj);
-        }
-        return obj;
+        return FindAudioOutInContext(_yapi, next_hwid);
     }
 
     /**
@@ -503,7 +513,7 @@ public class YAudioOut extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("AudioOut");
         if (next_hwid == null)  return null;
-        return FindAudioOut(next_hwid, yctx);
+        return FindAudioOutInContext(yctx, next_hwid);
     }
 
     /**
@@ -511,15 +521,17 @@ public class YAudioOut extends YFunction
      * Use the method YAudioOut.nextAudioOut() to iterate on
      * next audio outputs.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YAudioOut object, corresponding to
      *         the first audio output currently online, or a null pointer
      *         if there are none.
      */
-    public static YAudioOut FirstAudioOut(YAPIContext yapi)
+    public static YAudioOut FirstAudioOutInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("AudioOut");
+        String next_hwid = yctx._yHash.getFirstHardwareId("AudioOut");
         if (next_hwid == null)  return null;
-        return FindAudioOut(next_hwid, yapi);
+        return FindAudioOutInContext(yctx, next_hwid);
     }
 
     //--- (end of YAudioOut implementation)

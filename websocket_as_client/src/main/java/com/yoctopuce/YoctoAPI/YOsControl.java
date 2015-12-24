@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
+ * $Id: YOsControl.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindOsControl(), the high-level API for OsControl functions
  *
@@ -103,6 +103,15 @@ public class YOsControl extends YFunction
         //--- (end of YOsControl attributes initialization)
     }
 
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YOsControl(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
     //--- (YOsControl implementation)
     @Override
     protected void  _parseAttr(JSONObject json_val) throws JSONException
@@ -185,9 +194,44 @@ public class YOsControl extends YFunction
     public static YOsControl FindOsControl(String func)
     {
         YOsControl obj;
-        obj = (YOsControl) YFunction._FindFromCache(YAPI.GetYCtx(), "OsControl", func);
+        obj = (YOsControl) YFunction._FindFromCache("OsControl", func);
         if (obj == null) {
-            obj = new YOsControl(YAPI.GetYCtx(), func);
+            obj = new YOsControl(func);
+            YFunction._AddToCache("OsControl", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves OS control for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the OS control is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YOsControl.isOnline() to test if the OS control is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * OS control by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the OS control
+     *
+     * @return a YOsControl object allowing you to drive the OS control.
+     */
+    public static YOsControl FindOsControlInContext(YAPIContext yctx,String func)
+    {
+        YOsControl obj;
+        obj = (YOsControl) YFunction._FindFromCache(yctx, "OsControl", func);
+        if (obj == null) {
+            obj = new YOsControl(yctx, func);
             YFunction._AddToCache("OsControl", func, obj);
         }
         return obj;
@@ -265,41 +309,7 @@ public class YOsControl extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindOsControl(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves OS control for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the OS control is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YOsControl.isOnline() to test if the OS control is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * OS control by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the OS control
-     *
-     * @return a YOsControl object allowing you to drive the OS control.
-     */
-    public static YOsControl FindOsControl(String func, YAPIContext yapi_obj)
-    {
-        YOsControl obj;
-        obj = (YOsControl) YFunction._FindFromCache(yapi_obj, "OsControl", func);
-        if (obj == null) {
-            obj = new YOsControl(yapi_obj, func);
-            YFunction._AddToCache("OsControl", func, obj);
-        }
-        return obj;
+        return FindOsControlInContext(_yapi, next_hwid);
     }
 
     /**
@@ -316,7 +326,7 @@ public class YOsControl extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("OsControl");
         if (next_hwid == null)  return null;
-        return FindOsControl(next_hwid, yctx);
+        return FindOsControlInContext(yctx, next_hwid);
     }
 
     /**
@@ -324,15 +334,17 @@ public class YOsControl extends YFunction
      * Use the method YOsControl.nextOsControl() to iterate on
      * next OS control.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YOsControl object, corresponding to
      *         the first OS control currently online, or a null pointer
      *         if there are none.
      */
-    public static YOsControl FirstOsControl(YAPIContext yapi)
+    public static YOsControl FirstOsControlInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("OsControl");
+        String next_hwid = yctx._yHash.getFirstHardwareId("OsControl");
         if (next_hwid == null)  return null;
-        return FindOsControl(next_hwid, yapi);
+        return FindOsControlInContext(yctx, next_hwid);
     }
 
     //--- (end of YOsControl implementation)

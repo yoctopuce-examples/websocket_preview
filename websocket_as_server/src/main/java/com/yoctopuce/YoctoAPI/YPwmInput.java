@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YPwmInput.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindPwmInput(), the high-level API for PwmInput functions
  *
@@ -138,6 +138,15 @@ public class YPwmInput extends YSensor
         _className = "PwmInput";
         //--- (YPwmInput attributes initialization)
         //--- (end of YPwmInput attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YPwmInput(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YPwmInput implementation)
@@ -463,9 +472,44 @@ public class YPwmInput extends YSensor
     public static YPwmInput FindPwmInput(String func)
     {
         YPwmInput obj;
-        obj = (YPwmInput) YFunction._FindFromCache(YAPI.GetYCtx(), "PwmInput", func);
+        obj = (YPwmInput) YFunction._FindFromCache("PwmInput", func);
         if (obj == null) {
-            obj = new YPwmInput(YAPI.GetYCtx(), func);
+            obj = new YPwmInput(func);
+            YFunction._AddToCache("PwmInput", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a PWM input for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the PWM input is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YPwmInput.isOnline() to test if the PWM input is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a PWM input by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the PWM input
+     *
+     * @return a YPwmInput object allowing you to drive the PWM input.
+     */
+    public static YPwmInput FindPwmInputInContext(YAPIContext yctx,String func)
+    {
+        YPwmInput obj;
+        obj = (YPwmInput) YFunction._FindFromCache(yctx, "PwmInput", func);
+        if (obj == null) {
+            obj = new YPwmInput(yctx, func);
             YFunction._AddToCache("PwmInput", func, obj);
         }
         return obj;
@@ -574,41 +618,7 @@ public class YPwmInput extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindPwmInput(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a PWM input for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the PWM input is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YPwmInput.isOnline() to test if the PWM input is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a PWM input by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the PWM input
-     *
-     * @return a YPwmInput object allowing you to drive the PWM input.
-     */
-    public static YPwmInput FindPwmInput(String func, YAPIContext yapi_obj)
-    {
-        YPwmInput obj;
-        obj = (YPwmInput) YFunction._FindFromCache(yapi_obj, "PwmInput", func);
-        if (obj == null) {
-            obj = new YPwmInput(yapi_obj, func);
-            YFunction._AddToCache("PwmInput", func, obj);
-        }
-        return obj;
+        return FindPwmInputInContext(_yapi, next_hwid);
     }
 
     /**
@@ -625,7 +635,7 @@ public class YPwmInput extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("PwmInput");
         if (next_hwid == null)  return null;
-        return FindPwmInput(next_hwid, yctx);
+        return FindPwmInputInContext(yctx, next_hwid);
     }
 
     /**
@@ -633,15 +643,17 @@ public class YPwmInput extends YSensor
      * Use the method YPwmInput.nextPwmInput() to iterate on
      * next PWM inputs.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YPwmInput object, corresponding to
      *         the first PWM input currently online, or a null pointer
      *         if there are none.
      */
-    public static YPwmInput FirstPwmInput(YAPIContext yapi)
+    public static YPwmInput FirstPwmInputInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("PwmInput");
+        String next_hwid = yctx._yHash.getFirstHardwareId("PwmInput");
         if (next_hwid == null)  return null;
-        return FindPwmInput(next_hwid, yapi);
+        return FindPwmInputInContext(yctx, next_hwid);
     }
 
     //--- (end of YPwmInput implementation)

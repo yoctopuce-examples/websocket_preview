@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YMotor.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindMotor(), the high-level API for Motor functions
  *
@@ -151,6 +151,15 @@ public class YMotor extends YFunction
         _className = "Motor";
         //--- (YMotor attributes initialization)
         //--- (end of YMotor attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YMotor(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YMotor implementation)
@@ -824,9 +833,44 @@ public class YMotor extends YFunction
     public static YMotor FindMotor(String func)
     {
         YMotor obj;
-        obj = (YMotor) YFunction._FindFromCache(YAPI.GetYCtx(), "Motor", func);
+        obj = (YMotor) YFunction._FindFromCache("Motor", func);
         if (obj == null) {
-            obj = new YMotor(YAPI.GetYCtx(), func);
+            obj = new YMotor(func);
+            YFunction._AddToCache("Motor", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a motor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the motor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YMotor.isOnline() to test if the motor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a motor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the motor
+     *
+     * @return a YMotor object allowing you to drive the motor.
+     */
+    public static YMotor FindMotorInContext(YAPIContext yctx,String func)
+    {
+        YMotor obj;
+        obj = (YMotor) YFunction._FindFromCache(yctx, "Motor", func);
+        if (obj == null) {
+            obj = new YMotor(yctx, func);
             YFunction._AddToCache("Motor", func, obj);
         }
         return obj;
@@ -940,41 +984,7 @@ public class YMotor extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindMotor(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a motor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the motor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YMotor.isOnline() to test if the motor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a motor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the motor
-     *
-     * @return a YMotor object allowing you to drive the motor.
-     */
-    public static YMotor FindMotor(String func, YAPIContext yapi_obj)
-    {
-        YMotor obj;
-        obj = (YMotor) YFunction._FindFromCache(yapi_obj, "Motor", func);
-        if (obj == null) {
-            obj = new YMotor(yapi_obj, func);
-            YFunction._AddToCache("Motor", func, obj);
-        }
-        return obj;
+        return FindMotorInContext(_yapi, next_hwid);
     }
 
     /**
@@ -991,7 +1001,7 @@ public class YMotor extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Motor");
         if (next_hwid == null)  return null;
-        return FindMotor(next_hwid, yctx);
+        return FindMotorInContext(yctx, next_hwid);
     }
 
     /**
@@ -999,15 +1009,17 @@ public class YMotor extends YFunction
      * Use the method YMotor.nextMotor() to iterate on
      * next motors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YMotor object, corresponding to
      *         the first motor currently online, or a null pointer
      *         if there are none.
      */
-    public static YMotor FirstMotor(YAPIContext yapi)
+    public static YMotor FirstMotorInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Motor");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Motor");
         if (next_hwid == null)  return null;
-        return FindMotor(next_hwid, yapi);
+        return FindMotorInContext(yctx, next_hwid);
     }
 
     //--- (end of YMotor implementation)

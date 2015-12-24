@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YAudioIn.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindAudioIn(), the high-level API for AudioIn functions
  *
@@ -121,6 +121,15 @@ public class YAudioIn extends YFunction
         _className = "AudioIn";
         //--- (YAudioIn attributes initialization)
         //--- (end of YAudioIn attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YAudioIn(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YAudioIn implementation)
@@ -386,9 +395,44 @@ public class YAudioIn extends YFunction
     public static YAudioIn FindAudioIn(String func)
     {
         YAudioIn obj;
-        obj = (YAudioIn) YFunction._FindFromCache(YAPI.GetYCtx(), "AudioIn", func);
+        obj = (YAudioIn) YFunction._FindFromCache("AudioIn", func);
         if (obj == null) {
-            obj = new YAudioIn(YAPI.GetYCtx(), func);
+            obj = new YAudioIn(func);
+            YFunction._AddToCache("AudioIn", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves an audio input for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the audio input is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YAudioIn.isOnline() to test if the audio input is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * an audio input by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the audio input
+     *
+     * @return a YAudioIn object allowing you to drive the audio input.
+     */
+    public static YAudioIn FindAudioInInContext(YAPIContext yctx,String func)
+    {
+        YAudioIn obj;
+        obj = (YAudioIn) YFunction._FindFromCache(yctx, "AudioIn", func);
+        if (obj == null) {
+            obj = new YAudioIn(yctx, func);
             YFunction._AddToCache("AudioIn", func, obj);
         }
         return obj;
@@ -452,41 +496,7 @@ public class YAudioIn extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindAudioIn(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves an audio input for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the audio input is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YAudioIn.isOnline() to test if the audio input is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * an audio input by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the audio input
-     *
-     * @return a YAudioIn object allowing you to drive the audio input.
-     */
-    public static YAudioIn FindAudioIn(String func, YAPIContext yapi_obj)
-    {
-        YAudioIn obj;
-        obj = (YAudioIn) YFunction._FindFromCache(yapi_obj, "AudioIn", func);
-        if (obj == null) {
-            obj = new YAudioIn(yapi_obj, func);
-            YFunction._AddToCache("AudioIn", func, obj);
-        }
-        return obj;
+        return FindAudioInInContext(_yapi, next_hwid);
     }
 
     /**
@@ -503,7 +513,7 @@ public class YAudioIn extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("AudioIn");
         if (next_hwid == null)  return null;
-        return FindAudioIn(next_hwid, yctx);
+        return FindAudioInInContext(yctx, next_hwid);
     }
 
     /**
@@ -511,15 +521,17 @@ public class YAudioIn extends YFunction
      * Use the method YAudioIn.nextAudioIn() to iterate on
      * next audio inputs.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YAudioIn object, corresponding to
      *         the first audio input currently online, or a null pointer
      *         if there are none.
      */
-    public static YAudioIn FirstAudioIn(YAPIContext yapi)
+    public static YAudioIn FirstAudioInInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("AudioIn");
+        String next_hwid = yctx._yHash.getFirstHardwareId("AudioIn");
         if (next_hwid == null)  return null;
-        return FindAudioIn(next_hwid, yapi);
+        return FindAudioInInContext(yctx, next_hwid);
     }
 
     //--- (end of YAudioIn implementation)

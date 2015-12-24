@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YQt.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YQt.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindQt(), the high-level API for Qt functions
  *
@@ -97,6 +97,12 @@ public class YQt extends YSensor
         //--- (generated code: YQt attributes initialization)
         //--- (end of generated code: YQt attributes initialization)
     }
+    protected YQt(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
+
 
     //--- (generated code: YQt implementation)
     @Override
@@ -131,9 +137,44 @@ public class YQt extends YSensor
     public static YQt FindQt(String func)
     {
         YQt obj;
-        obj = (YQt) YFunction._FindFromCache(YAPI.GetYCtx(), "Qt", func);
+        obj = (YQt) YFunction._FindFromCache("Qt", func);
         if (obj == null) {
-            obj = new YQt(YAPI.GetYCtx(), func);
+            obj = new YQt(func);
+            YFunction._AddToCache("Qt", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a quaternion component for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the quaternion component is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YQt.isOnline() to test if the quaternion component is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a quaternion component by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the quaternion component
+     *
+     * @return a YQt object allowing you to drive the quaternion component.
+     */
+    public static YQt FindQtInContext(YAPIContext yctx,String func)
+    {
+        YQt obj;
+        obj = (YQt) YFunction._FindFromCache(yctx, "Qt", func);
+        if (obj == null) {
+            obj = new YQt(yctx, func);
             YFunction._AddToCache("Qt", func, obj);
         }
         return obj;
@@ -230,41 +271,7 @@ public class YQt extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindQt(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a quaternion component for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the quaternion component is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YQt.isOnline() to test if the quaternion component is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a quaternion component by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the quaternion component
-     *
-     * @return a YQt object allowing you to drive the quaternion component.
-     */
-    public static YQt FindQt(String func, YAPIContext yapi_obj)
-    {
-        YQt obj;
-        obj = (YQt) YFunction._FindFromCache(yapi_obj, "Qt", func);
-        if (obj == null) {
-            obj = new YQt(yapi_obj, func);
-            YFunction._AddToCache("Qt", func, obj);
-        }
-        return obj;
+        return FindQtInContext(_yapi, next_hwid);
     }
 
     /**
@@ -281,7 +288,7 @@ public class YQt extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Qt");
         if (next_hwid == null)  return null;
-        return FindQt(next_hwid, yctx);
+        return FindQtInContext(yctx, next_hwid);
     }
 
     /**
@@ -289,15 +296,17 @@ public class YQt extends YSensor
      * Use the method YQt.nextQt() to iterate on
      * next quaternion components.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YQt object, corresponding to
      *         the first quaternion component currently online, or a null pointer
      *         if there are none.
      */
-    public static YQt FirstQt(YAPIContext yapi)
+    public static YQt FirstQtInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Qt");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Qt");
         if (next_hwid == null)  return null;
-        return FindQt(next_hwid, yapi);
+        return FindQtInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YQt implementation)

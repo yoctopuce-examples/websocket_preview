@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YBluetoothLink.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindBluetoothLink(), the high-level API for BluetoothLink functions
  *
@@ -153,6 +153,15 @@ public class YBluetoothLink extends YFunction
         _className = "BluetoothLink";
         //--- (YBluetoothLink attributes initialization)
         //--- (end of YBluetoothLink attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YBluetoothLink(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YBluetoothLink implementation)
@@ -691,9 +700,44 @@ public class YBluetoothLink extends YFunction
     public static YBluetoothLink FindBluetoothLink(String func)
     {
         YBluetoothLink obj;
-        obj = (YBluetoothLink) YFunction._FindFromCache(YAPI.GetYCtx(), "BluetoothLink", func);
+        obj = (YBluetoothLink) YFunction._FindFromCache("BluetoothLink", func);
         if (obj == null) {
-            obj = new YBluetoothLink(YAPI.GetYCtx(), func);
+            obj = new YBluetoothLink(func);
+            YFunction._AddToCache("BluetoothLink", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a cellular interface for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the cellular interface is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YBluetoothLink.isOnline() to test if the cellular interface is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a cellular interface by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the cellular interface
+     *
+     * @return a YBluetoothLink object allowing you to drive the cellular interface.
+     */
+    public static YBluetoothLink FindBluetoothLinkInContext(YAPIContext yctx,String func)
+    {
+        YBluetoothLink obj;
+        obj = (YBluetoothLink) YFunction._FindFromCache(yctx, "BluetoothLink", func);
+        if (obj == null) {
+            obj = new YBluetoothLink(yctx, func);
             YFunction._AddToCache("BluetoothLink", func, obj);
         }
         return obj;
@@ -781,41 +825,7 @@ public class YBluetoothLink extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindBluetoothLink(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a cellular interface for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the cellular interface is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YBluetoothLink.isOnline() to test if the cellular interface is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a cellular interface by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the cellular interface
-     *
-     * @return a YBluetoothLink object allowing you to drive the cellular interface.
-     */
-    public static YBluetoothLink FindBluetoothLink(String func, YAPIContext yapi_obj)
-    {
-        YBluetoothLink obj;
-        obj = (YBluetoothLink) YFunction._FindFromCache(yapi_obj, "BluetoothLink", func);
-        if (obj == null) {
-            obj = new YBluetoothLink(yapi_obj, func);
-            YFunction._AddToCache("BluetoothLink", func, obj);
-        }
-        return obj;
+        return FindBluetoothLinkInContext(_yapi, next_hwid);
     }
 
     /**
@@ -832,7 +842,7 @@ public class YBluetoothLink extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("BluetoothLink");
         if (next_hwid == null)  return null;
-        return FindBluetoothLink(next_hwid, yctx);
+        return FindBluetoothLinkInContext(yctx, next_hwid);
     }
 
     /**
@@ -840,15 +850,17 @@ public class YBluetoothLink extends YFunction
      * Use the method YBluetoothLink.nextBluetoothLink() to iterate on
      * next cellular interfaces.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YBluetoothLink object, corresponding to
      *         the first cellular interface currently online, or a null pointer
      *         if there are none.
      */
-    public static YBluetoothLink FirstBluetoothLink(YAPIContext yapi)
+    public static YBluetoothLink FirstBluetoothLinkInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("BluetoothLink");
+        String next_hwid = yctx._yHash.getFirstHardwareId("BluetoothLink");
         if (next_hwid == null)  return null;
-        return FindBluetoothLink(next_hwid, yapi);
+        return FindBluetoothLinkInContext(yctx, next_hwid);
     }
 
     //--- (end of YBluetoothLink implementation)

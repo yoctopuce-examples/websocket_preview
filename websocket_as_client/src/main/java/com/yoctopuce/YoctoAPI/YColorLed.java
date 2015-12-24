@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YColorLed.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindColorLed(), the high-level API for ColorLed functions
  *
@@ -146,6 +146,15 @@ public class YColorLed extends YFunction
         _className = "ColorLed";
         //--- (YColorLed attributes initialization)
         //--- (end of YColorLed attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YColorLed(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YColorLed implementation)
@@ -645,9 +654,44 @@ public class YColorLed extends YFunction
     public static YColorLed FindColorLed(String func)
     {
         YColorLed obj;
-        obj = (YColorLed) YFunction._FindFromCache(YAPI.GetYCtx(), "ColorLed", func);
+        obj = (YColorLed) YFunction._FindFromCache("ColorLed", func);
         if (obj == null) {
-            obj = new YColorLed(YAPI.GetYCtx(), func);
+            obj = new YColorLed(func);
+            YFunction._AddToCache("ColorLed", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves an RGB led for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the RGB led is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YColorLed.isOnline() to test if the RGB led is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * an RGB led by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the RGB led
+     *
+     * @return a YColorLed object allowing you to drive the RGB led.
+     */
+    public static YColorLed FindColorLedInContext(YAPIContext yctx,String func)
+    {
+        YColorLed obj;
+        obj = (YColorLed) YFunction._FindFromCache(yctx, "ColorLed", func);
+        if (obj == null) {
+            obj = new YColorLed(yctx, func);
             YFunction._AddToCache("ColorLed", func, obj);
         }
         return obj;
@@ -781,41 +825,7 @@ public class YColorLed extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindColorLed(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves an RGB led for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the RGB led is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YColorLed.isOnline() to test if the RGB led is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * an RGB led by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the RGB led
-     *
-     * @return a YColorLed object allowing you to drive the RGB led.
-     */
-    public static YColorLed FindColorLed(String func, YAPIContext yapi_obj)
-    {
-        YColorLed obj;
-        obj = (YColorLed) YFunction._FindFromCache(yapi_obj, "ColorLed", func);
-        if (obj == null) {
-            obj = new YColorLed(yapi_obj, func);
-            YFunction._AddToCache("ColorLed", func, obj);
-        }
-        return obj;
+        return FindColorLedInContext(_yapi, next_hwid);
     }
 
     /**
@@ -832,7 +842,7 @@ public class YColorLed extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("ColorLed");
         if (next_hwid == null)  return null;
-        return FindColorLed(next_hwid, yctx);
+        return FindColorLedInContext(yctx, next_hwid);
     }
 
     /**
@@ -840,15 +850,17 @@ public class YColorLed extends YFunction
      * Use the method YColorLed.nextColorLed() to iterate on
      * next RGB leds.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YColorLed object, corresponding to
      *         the first RGB led currently online, or a null pointer
      *         if there are none.
      */
-    public static YColorLed FirstColorLed(YAPIContext yapi)
+    public static YColorLed FirstColorLedInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("ColorLed");
+        String next_hwid = yctx._yHash.getFirstHardwareId("ColorLed");
         if (next_hwid == null)  return null;
-        return FindColorLed(next_hwid, yapi);
+        return FindColorLedInContext(yctx, next_hwid);
     }
 
     //--- (end of YColorLed implementation)

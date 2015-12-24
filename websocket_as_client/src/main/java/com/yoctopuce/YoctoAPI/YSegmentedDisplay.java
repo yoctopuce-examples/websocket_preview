@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YSegmentedDisplay.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindSegmentedDisplay(), the high-level API for SegmentedDisplay functions
  *
@@ -108,6 +108,15 @@ public class YSegmentedDisplay extends YFunction
         _className = "SegmentedDisplay";
         //--- (YSegmentedDisplay attributes initialization)
         //--- (end of YSegmentedDisplay attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YSegmentedDisplay(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YSegmentedDisplay implementation)
@@ -243,9 +252,44 @@ public class YSegmentedDisplay extends YFunction
     public static YSegmentedDisplay FindSegmentedDisplay(String func)
     {
         YSegmentedDisplay obj;
-        obj = (YSegmentedDisplay) YFunction._FindFromCache(YAPI.GetYCtx(), "SegmentedDisplay", func);
+        obj = (YSegmentedDisplay) YFunction._FindFromCache("SegmentedDisplay", func);
         if (obj == null) {
-            obj = new YSegmentedDisplay(YAPI.GetYCtx(), func);
+            obj = new YSegmentedDisplay(func);
+            YFunction._AddToCache("SegmentedDisplay", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a segmented display for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the segmented displays is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YSegmentedDisplay.isOnline() to test if the segmented displays is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a segmented display by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the segmented displays
+     *
+     * @return a YSegmentedDisplay object allowing you to drive the segmented displays.
+     */
+    public static YSegmentedDisplay FindSegmentedDisplayInContext(YAPIContext yctx,String func)
+    {
+        YSegmentedDisplay obj;
+        obj = (YSegmentedDisplay) YFunction._FindFromCache(yctx, "SegmentedDisplay", func);
+        if (obj == null) {
+            obj = new YSegmentedDisplay(yctx, func);
             YFunction._AddToCache("SegmentedDisplay", func, obj);
         }
         return obj;
@@ -309,41 +353,7 @@ public class YSegmentedDisplay extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindSegmentedDisplay(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a segmented display for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the segmented displays is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YSegmentedDisplay.isOnline() to test if the segmented displays is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a segmented display by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the segmented displays
-     *
-     * @return a YSegmentedDisplay object allowing you to drive the segmented displays.
-     */
-    public static YSegmentedDisplay FindSegmentedDisplay(String func, YAPIContext yapi_obj)
-    {
-        YSegmentedDisplay obj;
-        obj = (YSegmentedDisplay) YFunction._FindFromCache(yapi_obj, "SegmentedDisplay", func);
-        if (obj == null) {
-            obj = new YSegmentedDisplay(yapi_obj, func);
-            YFunction._AddToCache("SegmentedDisplay", func, obj);
-        }
-        return obj;
+        return FindSegmentedDisplayInContext(_yapi, next_hwid);
     }
 
     /**
@@ -360,7 +370,7 @@ public class YSegmentedDisplay extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("SegmentedDisplay");
         if (next_hwid == null)  return null;
-        return FindSegmentedDisplay(next_hwid, yctx);
+        return FindSegmentedDisplayInContext(yctx, next_hwid);
     }
 
     /**
@@ -368,15 +378,17 @@ public class YSegmentedDisplay extends YFunction
      * Use the method YSegmentedDisplay.nextSegmentedDisplay() to iterate on
      * next segmented displays.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YSegmentedDisplay object, corresponding to
      *         the first segmented displays currently online, or a null pointer
      *         if there are none.
      */
-    public static YSegmentedDisplay FirstSegmentedDisplay(YAPIContext yapi)
+    public static YSegmentedDisplay FirstSegmentedDisplayInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("SegmentedDisplay");
+        String next_hwid = yctx._yHash.getFirstHardwareId("SegmentedDisplay");
         if (next_hwid == null)  return null;
-        return FindSegmentedDisplay(next_hwid, yapi);
+        return FindSegmentedDisplayInContext(yctx, next_hwid);
     }
 
     //--- (end of YSegmentedDisplay implementation)

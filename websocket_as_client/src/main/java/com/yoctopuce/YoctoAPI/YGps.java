@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YGps.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindGps(), the high-level API for Gps functions
  *
@@ -168,6 +168,15 @@ public class YGps extends YFunction
         _className = "Gps";
         //--- (YGps attributes initialization)
         //--- (end of YGps attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YGps(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YGps implementation)
@@ -710,9 +719,44 @@ public class YGps extends YFunction
     public static YGps FindGps(String func)
     {
         YGps obj;
-        obj = (YGps) YFunction._FindFromCache(YAPI.GetYCtx(), "Gps", func);
+        obj = (YGps) YFunction._FindFromCache("Gps", func);
         if (obj == null) {
-            obj = new YGps(YAPI.GetYCtx(), func);
+            obj = new YGps(func);
+            YFunction._AddToCache("Gps", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a GPS for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the GPS is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YGps.isOnline() to test if the GPS is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a GPS by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the GPS
+     *
+     * @return a YGps object allowing you to drive the GPS.
+     */
+    public static YGps FindGpsInContext(YAPIContext yctx,String func)
+    {
+        YGps obj;
+        obj = (YGps) YFunction._FindFromCache(yctx, "Gps", func);
+        if (obj == null) {
+            obj = new YGps(yctx, func);
             YFunction._AddToCache("Gps", func, obj);
         }
         return obj;
@@ -776,41 +820,7 @@ public class YGps extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindGps(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a GPS for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the GPS is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YGps.isOnline() to test if the GPS is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a GPS by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the GPS
-     *
-     * @return a YGps object allowing you to drive the GPS.
-     */
-    public static YGps FindGps(String func, YAPIContext yapi_obj)
-    {
-        YGps obj;
-        obj = (YGps) YFunction._FindFromCache(yapi_obj, "Gps", func);
-        if (obj == null) {
-            obj = new YGps(yapi_obj, func);
-            YFunction._AddToCache("Gps", func, obj);
-        }
-        return obj;
+        return FindGpsInContext(_yapi, next_hwid);
     }
 
     /**
@@ -827,7 +837,7 @@ public class YGps extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Gps");
         if (next_hwid == null)  return null;
-        return FindGps(next_hwid, yctx);
+        return FindGpsInContext(yctx, next_hwid);
     }
 
     /**
@@ -835,15 +845,17 @@ public class YGps extends YFunction
      * Use the method YGps.nextGps() to iterate on
      * next GPS.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YGps object, corresponding to
      *         the first GPS currently online, or a null pointer
      *         if there are none.
      */
-    public static YGps FirstGps(YAPIContext yapi)
+    public static YGps FirstGpsInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Gps");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Gps");
         if (next_hwid == null)  return null;
-        return FindGps(next_hwid, yapi);
+        return FindGpsInContext(yctx, next_hwid);
     }
 
     //--- (end of YGps implementation)

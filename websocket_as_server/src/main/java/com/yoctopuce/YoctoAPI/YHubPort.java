@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YHubPort.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindHubPort(), the high-level API for HubPort functions
  *
@@ -119,6 +119,15 @@ public class YHubPort extends YFunction
         _className = "HubPort";
         //--- (YHubPort attributes initialization)
         //--- (end of YHubPort attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YHubPort(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YHubPort implementation)
@@ -292,9 +301,44 @@ public class YHubPort extends YFunction
     public static YHubPort FindHubPort(String func)
     {
         YHubPort obj;
-        obj = (YHubPort) YFunction._FindFromCache(YAPI.GetYCtx(), "HubPort", func);
+        obj = (YHubPort) YFunction._FindFromCache("HubPort", func);
         if (obj == null) {
-            obj = new YHubPort(YAPI.GetYCtx(), func);
+            obj = new YHubPort(func);
+            YFunction._AddToCache("HubPort", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a Yocto-hub port for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the Yocto-hub port is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YHubPort.isOnline() to test if the Yocto-hub port is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a Yocto-hub port by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the Yocto-hub port
+     *
+     * @return a YHubPort object allowing you to drive the Yocto-hub port.
+     */
+    public static YHubPort FindHubPortInContext(YAPIContext yctx,String func)
+    {
+        YHubPort obj;
+        obj = (YHubPort) YFunction._FindFromCache(yctx, "HubPort", func);
+        if (obj == null) {
+            obj = new YHubPort(yctx, func);
             YFunction._AddToCache("HubPort", func, obj);
         }
         return obj;
@@ -358,41 +402,7 @@ public class YHubPort extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindHubPort(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a Yocto-hub port for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the Yocto-hub port is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YHubPort.isOnline() to test if the Yocto-hub port is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a Yocto-hub port by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the Yocto-hub port
-     *
-     * @return a YHubPort object allowing you to drive the Yocto-hub port.
-     */
-    public static YHubPort FindHubPort(String func, YAPIContext yapi_obj)
-    {
-        YHubPort obj;
-        obj = (YHubPort) YFunction._FindFromCache(yapi_obj, "HubPort", func);
-        if (obj == null) {
-            obj = new YHubPort(yapi_obj, func);
-            YFunction._AddToCache("HubPort", func, obj);
-        }
-        return obj;
+        return FindHubPortInContext(_yapi, next_hwid);
     }
 
     /**
@@ -409,7 +419,7 @@ public class YHubPort extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("HubPort");
         if (next_hwid == null)  return null;
-        return FindHubPort(next_hwid, yctx);
+        return FindHubPortInContext(yctx, next_hwid);
     }
 
     /**
@@ -417,15 +427,17 @@ public class YHubPort extends YFunction
      * Use the method YHubPort.nextHubPort() to iterate on
      * next Yocto-hub ports.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YHubPort object, corresponding to
      *         the first Yocto-hub port currently online, or a null pointer
      *         if there are none.
      */
-    public static YHubPort FirstHubPort(YAPIContext yapi)
+    public static YHubPort FirstHubPortInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("HubPort");
+        String next_hwid = yctx._yHash.getFirstHardwareId("HubPort");
         if (next_hwid == null)  return null;
-        return FindHubPort(next_hwid, yapi);
+        return FindHubPortInContext(yctx, next_hwid);
     }
 
     //--- (end of YHubPort implementation)

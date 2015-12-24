@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YRefFrame.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindRefFrame(), the high-level API for RefFrame functions
  *
@@ -192,6 +192,15 @@ public class YRefFrame extends YFunction
         _className = "RefFrame";
         //--- (YRefFrame attributes initialization)
         //--- (end of YRefFrame attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YRefFrame(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YRefFrame implementation)
@@ -394,9 +403,44 @@ public class YRefFrame extends YFunction
     public static YRefFrame FindRefFrame(String func)
     {
         YRefFrame obj;
-        obj = (YRefFrame) YFunction._FindFromCache(YAPI.GetYCtx(), "RefFrame", func);
+        obj = (YRefFrame) YFunction._FindFromCache("RefFrame", func);
         if (obj == null) {
-            obj = new YRefFrame(YAPI.GetYCtx(), func);
+            obj = new YRefFrame(func);
+            YFunction._AddToCache("RefFrame", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a reference frame for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the reference frame is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YRefFrame.isOnline() to test if the reference frame is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a reference frame by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the reference frame
+     *
+     * @return a YRefFrame object allowing you to drive the reference frame.
+     */
+    public static YRefFrame FindRefFrameInContext(YAPIContext yctx,String func)
+    {
+        YRefFrame obj;
+        obj = (YRefFrame) YFunction._FindFromCache(yctx, "RefFrame", func);
+        if (obj == null) {
+            obj = new YRefFrame(yctx, func);
             YFunction._AddToCache("RefFrame", func, obj);
         }
         return obj;
@@ -971,41 +1015,7 @@ public class YRefFrame extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindRefFrame(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a reference frame for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the reference frame is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YRefFrame.isOnline() to test if the reference frame is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a reference frame by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the reference frame
-     *
-     * @return a YRefFrame object allowing you to drive the reference frame.
-     */
-    public static YRefFrame FindRefFrame(String func, YAPIContext yapi_obj)
-    {
-        YRefFrame obj;
-        obj = (YRefFrame) YFunction._FindFromCache(yapi_obj, "RefFrame", func);
-        if (obj == null) {
-            obj = new YRefFrame(yapi_obj, func);
-            YFunction._AddToCache("RefFrame", func, obj);
-        }
-        return obj;
+        return FindRefFrameInContext(_yapi, next_hwid);
     }
 
     /**
@@ -1022,7 +1032,7 @@ public class YRefFrame extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("RefFrame");
         if (next_hwid == null)  return null;
-        return FindRefFrame(next_hwid, yctx);
+        return FindRefFrameInContext(yctx, next_hwid);
     }
 
     /**
@@ -1030,15 +1040,17 @@ public class YRefFrame extends YFunction
      * Use the method YRefFrame.nextRefFrame() to iterate on
      * next reference frames.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YRefFrame object, corresponding to
      *         the first reference frame currently online, or a null pointer
      *         if there are none.
      */
-    public static YRefFrame FirstRefFrame(YAPIContext yapi)
+    public static YRefFrame FirstRefFrameInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("RefFrame");
+        String next_hwid = yctx._yHash.getFirstHardwareId("RefFrame");
         if (next_hwid == null)  return null;
-        return FindRefFrame(next_hwid, yapi);
+        return FindRefFrameInContext(yctx, next_hwid);
     }
 
     //--- (end of YRefFrame implementation)

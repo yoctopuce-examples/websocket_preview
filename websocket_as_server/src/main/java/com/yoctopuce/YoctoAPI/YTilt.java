@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YTilt.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindTilt(), the high-level API for Tilt functions
  *
@@ -113,6 +113,15 @@ public class YTilt extends YSensor
         //--- (end of YTilt attributes initialization)
     }
 
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YTilt(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
     //--- (YTilt implementation)
     @Override
     protected void  _parseAttr(JSONObject json_val) throws JSONException
@@ -170,9 +179,44 @@ public class YTilt extends YSensor
     public static YTilt FindTilt(String func)
     {
         YTilt obj;
-        obj = (YTilt) YFunction._FindFromCache(YAPI.GetYCtx(), "Tilt", func);
+        obj = (YTilt) YFunction._FindFromCache("Tilt", func);
         if (obj == null) {
-            obj = new YTilt(YAPI.GetYCtx(), func);
+            obj = new YTilt(func);
+            YFunction._AddToCache("Tilt", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a tilt sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the tilt sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YTilt.isOnline() to test if the tilt sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a tilt sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the tilt sensor
+     *
+     * @return a YTilt object allowing you to drive the tilt sensor.
+     */
+    public static YTilt FindTiltInContext(YAPIContext yctx,String func)
+    {
+        YTilt obj;
+        obj = (YTilt) YFunction._FindFromCache(yctx, "Tilt", func);
+        if (obj == null) {
+            obj = new YTilt(yctx, func);
             YFunction._AddToCache("Tilt", func, obj);
         }
         return obj;
@@ -269,41 +313,7 @@ public class YTilt extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindTilt(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a tilt sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the tilt sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YTilt.isOnline() to test if the tilt sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a tilt sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the tilt sensor
-     *
-     * @return a YTilt object allowing you to drive the tilt sensor.
-     */
-    public static YTilt FindTilt(String func, YAPIContext yapi_obj)
-    {
-        YTilt obj;
-        obj = (YTilt) YFunction._FindFromCache(yapi_obj, "Tilt", func);
-        if (obj == null) {
-            obj = new YTilt(yapi_obj, func);
-            YFunction._AddToCache("Tilt", func, obj);
-        }
-        return obj;
+        return FindTiltInContext(_yapi, next_hwid);
     }
 
     /**
@@ -320,7 +330,7 @@ public class YTilt extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Tilt");
         if (next_hwid == null)  return null;
-        return FindTilt(next_hwid, yctx);
+        return FindTiltInContext(yctx, next_hwid);
     }
 
     /**
@@ -328,15 +338,17 @@ public class YTilt extends YSensor
      * Use the method YTilt.nextTilt() to iterate on
      * next tilt sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YTilt object, corresponding to
      *         the first tilt sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YTilt FirstTilt(YAPIContext yapi)
+    public static YTilt FirstTiltInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Tilt");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Tilt");
         if (next_hwid == null)  return null;
-        return FindTilt(next_hwid, yapi);
+        return FindTiltInContext(yctx, next_hwid);
     }
 
     //--- (end of YTilt implementation)

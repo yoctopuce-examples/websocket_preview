@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YHumidity.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindHumidity(), the high-level API for Humidity functions
  *
@@ -107,6 +107,15 @@ public class YHumidity extends YSensor
         _className = "Humidity";
         //--- (YHumidity attributes initialization)
         //--- (end of YHumidity attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YHumidity(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YHumidity implementation)
@@ -249,9 +258,44 @@ public class YHumidity extends YSensor
     public static YHumidity FindHumidity(String func)
     {
         YHumidity obj;
-        obj = (YHumidity) YFunction._FindFromCache(YAPI.GetYCtx(), "Humidity", func);
+        obj = (YHumidity) YFunction._FindFromCache("Humidity", func);
         if (obj == null) {
-            obj = new YHumidity(YAPI.GetYCtx(), func);
+            obj = new YHumidity(func);
+            YFunction._AddToCache("Humidity", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a humidity sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the humidity sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YHumidity.isOnline() to test if the humidity sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a humidity sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the humidity sensor
+     *
+     * @return a YHumidity object allowing you to drive the humidity sensor.
+     */
+    public static YHumidity FindHumidityInContext(YAPIContext yctx,String func)
+    {
+        YHumidity obj;
+        obj = (YHumidity) YFunction._FindFromCache(yctx, "Humidity", func);
+        if (obj == null) {
+            obj = new YHumidity(yctx, func);
             YFunction._AddToCache("Humidity", func, obj);
         }
         return obj;
@@ -348,41 +392,7 @@ public class YHumidity extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindHumidity(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a humidity sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the humidity sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YHumidity.isOnline() to test if the humidity sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a humidity sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the humidity sensor
-     *
-     * @return a YHumidity object allowing you to drive the humidity sensor.
-     */
-    public static YHumidity FindHumidity(String func, YAPIContext yapi_obj)
-    {
-        YHumidity obj;
-        obj = (YHumidity) YFunction._FindFromCache(yapi_obj, "Humidity", func);
-        if (obj == null) {
-            obj = new YHumidity(yapi_obj, func);
-            YFunction._AddToCache("Humidity", func, obj);
-        }
-        return obj;
+        return FindHumidityInContext(_yapi, next_hwid);
     }
 
     /**
@@ -399,7 +409,7 @@ public class YHumidity extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Humidity");
         if (next_hwid == null)  return null;
-        return FindHumidity(next_hwid, yctx);
+        return FindHumidityInContext(yctx, next_hwid);
     }
 
     /**
@@ -407,15 +417,17 @@ public class YHumidity extends YSensor
      * Use the method YHumidity.nextHumidity() to iterate on
      * next humidity sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YHumidity object, corresponding to
      *         the first humidity sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YHumidity FirstHumidity(YAPIContext yapi)
+    public static YHumidity FirstHumidityInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Humidity");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Humidity");
         if (next_hwid == null)  return null;
-        return FindHumidity(next_hwid, yapi);
+        return FindHumidityInContext(yctx, next_hwid);
     }
 
     //--- (end of YHumidity implementation)

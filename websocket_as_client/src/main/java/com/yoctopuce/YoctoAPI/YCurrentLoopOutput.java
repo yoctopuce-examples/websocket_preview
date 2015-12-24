@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YCurrentLoopOutput.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindCurrentLoopOutput(), the high-level API for CurrentLoopOutput functions
  *
@@ -118,6 +118,15 @@ public class YCurrentLoopOutput extends YFunction
         _className = "CurrentLoopOutput";
         //--- (YCurrentLoopOutput attributes initialization)
         //--- (end of YCurrentLoopOutput attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YCurrentLoopOutput(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YCurrentLoopOutput implementation)
@@ -360,9 +369,44 @@ public class YCurrentLoopOutput extends YFunction
     public static YCurrentLoopOutput FindCurrentLoopOutput(String func)
     {
         YCurrentLoopOutput obj;
-        obj = (YCurrentLoopOutput) YFunction._FindFromCache(YAPI.GetYCtx(), "CurrentLoopOutput", func);
+        obj = (YCurrentLoopOutput) YFunction._FindFromCache("CurrentLoopOutput", func);
         if (obj == null) {
-            obj = new YCurrentLoopOutput(YAPI.GetYCtx(), func);
+            obj = new YCurrentLoopOutput(func);
+            YFunction._AddToCache("CurrentLoopOutput", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a 4-20mA output for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the 4-20mA output is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YCurrentLoopOutput.isOnline() to test if the 4-20mA output is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a 4-20mA output by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the 4-20mA output
+     *
+     * @return a YCurrentLoopOutput object allowing you to drive the 4-20mA output.
+     */
+    public static YCurrentLoopOutput FindCurrentLoopOutputInContext(YAPIContext yctx,String func)
+    {
+        YCurrentLoopOutput obj;
+        obj = (YCurrentLoopOutput) YFunction._FindFromCache(yctx, "CurrentLoopOutput", func);
+        if (obj == null) {
+            obj = new YCurrentLoopOutput(yctx, func);
             YFunction._AddToCache("CurrentLoopOutput", func, obj);
         }
         return obj;
@@ -450,41 +494,7 @@ public class YCurrentLoopOutput extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindCurrentLoopOutput(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a 4-20mA output for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the 4-20mA output is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YCurrentLoopOutput.isOnline() to test if the 4-20mA output is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a 4-20mA output by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the 4-20mA output
-     *
-     * @return a YCurrentLoopOutput object allowing you to drive the 4-20mA output.
-     */
-    public static YCurrentLoopOutput FindCurrentLoopOutput(String func, YAPIContext yapi_obj)
-    {
-        YCurrentLoopOutput obj;
-        obj = (YCurrentLoopOutput) YFunction._FindFromCache(yapi_obj, "CurrentLoopOutput", func);
-        if (obj == null) {
-            obj = new YCurrentLoopOutput(yapi_obj, func);
-            YFunction._AddToCache("CurrentLoopOutput", func, obj);
-        }
-        return obj;
+        return FindCurrentLoopOutputInContext(_yapi, next_hwid);
     }
 
     /**
@@ -501,7 +511,7 @@ public class YCurrentLoopOutput extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("CurrentLoopOutput");
         if (next_hwid == null)  return null;
-        return FindCurrentLoopOutput(next_hwid, yctx);
+        return FindCurrentLoopOutputInContext(yctx, next_hwid);
     }
 
     /**
@@ -509,15 +519,17 @@ public class YCurrentLoopOutput extends YFunction
      * Use the method YCurrentLoopOutput.nextCurrentLoopOutput() to iterate on
      * next 4-20mA outputs.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YCurrentLoopOutput object, corresponding to
      *         the first 4-20mA output currently online, or a null pointer
      *         if there are none.
      */
-    public static YCurrentLoopOutput FirstCurrentLoopOutput(YAPIContext yapi)
+    public static YCurrentLoopOutput FirstCurrentLoopOutputInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("CurrentLoopOutput");
+        String next_hwid = yctx._yHash.getFirstHardwareId("CurrentLoopOutput");
         if (next_hwid == null)  return null;
-        return FindCurrentLoopOutput(next_hwid, yapi);
+        return FindCurrentLoopOutputInContext(yctx, next_hwid);
     }
 
     //--- (end of YCurrentLoopOutput implementation)

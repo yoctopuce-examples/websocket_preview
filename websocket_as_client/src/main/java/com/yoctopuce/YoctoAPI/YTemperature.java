@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YTemperature.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindTemperature(), the high-level API for Temperature functions
  *
@@ -124,6 +124,15 @@ public class YTemperature extends YSensor
         _className = "Temperature";
         //--- (YTemperature attributes initialization)
         //--- (end of YTemperature attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YTemperature(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YTemperature implementation)
@@ -332,9 +341,44 @@ public class YTemperature extends YSensor
     public static YTemperature FindTemperature(String func)
     {
         YTemperature obj;
-        obj = (YTemperature) YFunction._FindFromCache(YAPI.GetYCtx(), "Temperature", func);
+        obj = (YTemperature) YFunction._FindFromCache("Temperature", func);
         if (obj == null) {
-            obj = new YTemperature(YAPI.GetYCtx(), func);
+            obj = new YTemperature(func);
+            YFunction._AddToCache("Temperature", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a temperature sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the temperature sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YTemperature.isOnline() to test if the temperature sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a temperature sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the temperature sensor
+     *
+     * @return a YTemperature object allowing you to drive the temperature sensor.
+     */
+    public static YTemperature FindTemperatureInContext(YAPIContext yctx,String func)
+    {
+        YTemperature obj;
+        obj = (YTemperature) YFunction._FindFromCache(yctx, "Temperature", func);
+        if (obj == null) {
+            obj = new YTemperature(yctx, func);
             YFunction._AddToCache("Temperature", func, obj);
         }
         return obj;
@@ -594,41 +638,7 @@ public class YTemperature extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindTemperature(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a temperature sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the temperature sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YTemperature.isOnline() to test if the temperature sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a temperature sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the temperature sensor
-     *
-     * @return a YTemperature object allowing you to drive the temperature sensor.
-     */
-    public static YTemperature FindTemperature(String func, YAPIContext yapi_obj)
-    {
-        YTemperature obj;
-        obj = (YTemperature) YFunction._FindFromCache(yapi_obj, "Temperature", func);
-        if (obj == null) {
-            obj = new YTemperature(yapi_obj, func);
-            YFunction._AddToCache("Temperature", func, obj);
-        }
-        return obj;
+        return FindTemperatureInContext(_yapi, next_hwid);
     }
 
     /**
@@ -645,7 +655,7 @@ public class YTemperature extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Temperature");
         if (next_hwid == null)  return null;
-        return FindTemperature(next_hwid, yctx);
+        return FindTemperatureInContext(yctx, next_hwid);
     }
 
     /**
@@ -653,15 +663,17 @@ public class YTemperature extends YSensor
      * Use the method YTemperature.nextTemperature() to iterate on
      * next temperature sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YTemperature object, corresponding to
      *         the first temperature sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YTemperature FirstTemperature(YAPIContext yapi)
+    public static YTemperature FirstTemperatureInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Temperature");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Temperature");
         if (next_hwid == null)  return null;
-        return FindTemperature(next_hwid, yapi);
+        return FindTemperatureInContext(yctx, next_hwid);
     }
 
     //--- (end of YTemperature implementation)

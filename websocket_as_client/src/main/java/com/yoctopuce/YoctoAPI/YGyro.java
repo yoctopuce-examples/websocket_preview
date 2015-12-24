@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: YGyro.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YGyro.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements yFindGyro(), the high-level API for Gyro functions
  *
@@ -160,6 +160,12 @@ public class YGyro extends YSensor
         //--- (end of generated code: YGyro attributes initialization)
     }
 
+    protected YGyro(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
+
     //--- (generated code: YGyro implementation)
     @Override
     protected void  _parseAttr(JSONObject json_val) throws JSONException
@@ -295,9 +301,44 @@ public class YGyro extends YSensor
     public static YGyro FindGyro(String func)
     {
         YGyro obj;
-        obj = (YGyro) YFunction._FindFromCache(YAPI.GetYCtx(), "Gyro", func);
+        obj = (YGyro) YFunction._FindFromCache("Gyro", func);
         if (obj == null) {
-            obj = new YGyro(YAPI.GetYCtx(), func);
+            obj = new YGyro(func);
+            YFunction._AddToCache("Gyro", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a gyroscope for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the gyroscope is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YGyro.isOnline() to test if the gyroscope is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a gyroscope by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the gyroscope
+     *
+     * @return a YGyro object allowing you to drive the gyroscope.
+     */
+    public static YGyro FindGyroInContext(YAPIContext yctx,String func)
+    {
+        YGyro obj;
+        obj = (YGyro) YFunction._FindFromCache(yctx, "Gyro", func);
+        if (obj == null) {
+            obj = new YGyro(yctx, func);
             YFunction._AddToCache("Gyro", func, obj);
         }
         return obj;
@@ -388,10 +429,10 @@ public class YGyro extends YSensor
                 return YAPI.DEVICE_NOT_FOUND;
             }
             if (_qt_stamp == 0) {
-                _qt_w = YQt.FindQt(String.format("%s.qt1",_serial), _yapi);
-                _qt_x = YQt.FindQt(String.format("%s.qt2",_serial), _yapi);
-                _qt_y = YQt.FindQt(String.format("%s.qt3",_serial), _yapi);
-                _qt_z = YQt.FindQt(String.format("%s.qt4",_serial), _yapi);
+                _qt_w = YQt.FindQtInContext(_yapi, String.format("%s.qt1",_serial));
+                _qt_x = YQt.FindQtInContext(_yapi, String.format("%s.qt2",_serial));
+                _qt_y = YQt.FindQtInContext(_yapi, String.format("%s.qt3",_serial));
+                _qt_z = YQt.FindQtInContext(_yapi, String.format("%s.qt4",_serial));
             }
             if (_qt_w.load(9) != YAPI.SUCCESS) {
                 return YAPI.DEVICE_NOT_FOUND;
@@ -694,41 +735,7 @@ public class YGyro extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindGyro(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a gyroscope for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the gyroscope is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YGyro.isOnline() to test if the gyroscope is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a gyroscope by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the gyroscope
-     *
-     * @return a YGyro object allowing you to drive the gyroscope.
-     */
-    public static YGyro FindGyro(String func, YAPIContext yapi_obj)
-    {
-        YGyro obj;
-        obj = (YGyro) YFunction._FindFromCache(yapi_obj, "Gyro", func);
-        if (obj == null) {
-            obj = new YGyro(yapi_obj, func);
-            YFunction._AddToCache("Gyro", func, obj);
-        }
-        return obj;
+        return FindGyroInContext(_yapi, next_hwid);
     }
 
     /**
@@ -745,7 +752,7 @@ public class YGyro extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Gyro");
         if (next_hwid == null)  return null;
-        return FindGyro(next_hwid, yctx);
+        return FindGyroInContext(yctx, next_hwid);
     }
 
     /**
@@ -753,15 +760,17 @@ public class YGyro extends YSensor
      * Use the method YGyro.nextGyro() to iterate on
      * next gyroscopes.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YGyro object, corresponding to
      *         the first gyro currently online, or a null pointer
      *         if there are none.
      */
-    public static YGyro FirstGyro(YAPIContext yapi)
+    public static YGyro FirstGyroInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Gyro");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Gyro");
         if (next_hwid == null)  return null;
-        return FindGyro(next_hwid, yapi);
+        return FindGyroInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YGyro implementation)

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YAltitude.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindAltitude(), the high-level API for Altitude functions
  *
@@ -109,6 +109,15 @@ public class YAltitude extends YSensor
         _className = "Altitude";
         //--- (YAltitude attributes initialization)
         //--- (end of YAltitude attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YAltitude(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YAltitude implementation)
@@ -288,9 +297,44 @@ public class YAltitude extends YSensor
     public static YAltitude FindAltitude(String func)
     {
         YAltitude obj;
-        obj = (YAltitude) YFunction._FindFromCache(YAPI.GetYCtx(), "Altitude", func);
+        obj = (YAltitude) YFunction._FindFromCache("Altitude", func);
         if (obj == null) {
-            obj = new YAltitude(YAPI.GetYCtx(), func);
+            obj = new YAltitude(func);
+            YFunction._AddToCache("Altitude", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves an altimeter for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the altimeter is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YAltitude.isOnline() to test if the altimeter is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * an altimeter by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the altimeter
+     *
+     * @return a YAltitude object allowing you to drive the altimeter.
+     */
+    public static YAltitude FindAltitudeInContext(YAPIContext yctx,String func)
+    {
+        YAltitude obj;
+        obj = (YAltitude) YFunction._FindFromCache(yctx, "Altitude", func);
+        if (obj == null) {
+            obj = new YAltitude(yctx, func);
             YFunction._AddToCache("Altitude", func, obj);
         }
         return obj;
@@ -387,41 +431,7 @@ public class YAltitude extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindAltitude(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves an altimeter for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the altimeter is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YAltitude.isOnline() to test if the altimeter is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * an altimeter by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the altimeter
-     *
-     * @return a YAltitude object allowing you to drive the altimeter.
-     */
-    public static YAltitude FindAltitude(String func, YAPIContext yapi_obj)
-    {
-        YAltitude obj;
-        obj = (YAltitude) YFunction._FindFromCache(yapi_obj, "Altitude", func);
-        if (obj == null) {
-            obj = new YAltitude(yapi_obj, func);
-            YFunction._AddToCache("Altitude", func, obj);
-        }
-        return obj;
+        return FindAltitudeInContext(_yapi, next_hwid);
     }
 
     /**
@@ -438,7 +448,7 @@ public class YAltitude extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Altitude");
         if (next_hwid == null)  return null;
-        return FindAltitude(next_hwid, yctx);
+        return FindAltitudeInContext(yctx, next_hwid);
     }
 
     /**
@@ -446,15 +456,17 @@ public class YAltitude extends YSensor
      * Use the method YAltitude.nextAltitude() to iterate on
      * next altimeters.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YAltitude object, corresponding to
      *         the first altimeter currently online, or a null pointer
      *         if there are none.
      */
-    public static YAltitude FirstAltitude(YAPIContext yapi)
+    public static YAltitude FirstAltitudeInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Altitude");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Altitude");
         if (next_hwid == null)  return null;
-        return FindAltitude(next_hwid, yapi);
+        return FindAltitudeInContext(yctx, next_hwid);
     }
 
     //--- (end of YAltitude implementation)

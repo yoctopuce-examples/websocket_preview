@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YBuzzer.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindBuzzer(), the high-level API for Buzzer functions
  *
@@ -126,6 +126,15 @@ public class YBuzzer extends YFunction
         _className = "Buzzer";
         //--- (YBuzzer attributes initialization)
         //--- (end of YBuzzer attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YBuzzer(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YBuzzer implementation)
@@ -426,9 +435,44 @@ public class YBuzzer extends YFunction
     public static YBuzzer FindBuzzer(String func)
     {
         YBuzzer obj;
-        obj = (YBuzzer) YFunction._FindFromCache(YAPI.GetYCtx(), "Buzzer", func);
+        obj = (YBuzzer) YFunction._FindFromCache("Buzzer", func);
         if (obj == null) {
-            obj = new YBuzzer(YAPI.GetYCtx(), func);
+            obj = new YBuzzer(func);
+            YFunction._AddToCache("Buzzer", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a buzzer for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the buzzer is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YBuzzer.isOnline() to test if the buzzer is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a buzzer by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the buzzer
+     *
+     * @return a YBuzzer object allowing you to drive the buzzer.
+     */
+    public static YBuzzer FindBuzzerInContext(YAPIContext yctx,String func)
+    {
+        YBuzzer obj;
+        obj = (YBuzzer) YFunction._FindFromCache(yctx, "Buzzer", func);
+        if (obj == null) {
+            obj = new YBuzzer(yctx, func);
             YFunction._AddToCache("Buzzer", func, obj);
         }
         return obj;
@@ -620,41 +664,7 @@ public class YBuzzer extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindBuzzer(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a buzzer for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the buzzer is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YBuzzer.isOnline() to test if the buzzer is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a buzzer by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the buzzer
-     *
-     * @return a YBuzzer object allowing you to drive the buzzer.
-     */
-    public static YBuzzer FindBuzzer(String func, YAPIContext yapi_obj)
-    {
-        YBuzzer obj;
-        obj = (YBuzzer) YFunction._FindFromCache(yapi_obj, "Buzzer", func);
-        if (obj == null) {
-            obj = new YBuzzer(yapi_obj, func);
-            YFunction._AddToCache("Buzzer", func, obj);
-        }
-        return obj;
+        return FindBuzzerInContext(_yapi, next_hwid);
     }
 
     /**
@@ -671,7 +681,7 @@ public class YBuzzer extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Buzzer");
         if (next_hwid == null)  return null;
-        return FindBuzzer(next_hwid, yctx);
+        return FindBuzzerInContext(yctx, next_hwid);
     }
 
     /**
@@ -679,15 +689,17 @@ public class YBuzzer extends YFunction
      * Use the method YBuzzer.nextBuzzer() to iterate on
      * next buzzers.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YBuzzer object, corresponding to
      *         the first buzzer currently online, or a null pointer
      *         if there are none.
      */
-    public static YBuzzer FirstBuzzer(YAPIContext yapi)
+    public static YBuzzer FirstBuzzerInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Buzzer");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Buzzer");
         if (next_hwid == null)  return null;
-        return FindBuzzer(next_hwid, yapi);
+        return FindBuzzerInContext(yctx, next_hwid);
     }
 
     //--- (end of YBuzzer implementation)

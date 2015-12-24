@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YCellular.java 22359 2015-12-15 13:30:10Z seb $
+ * $Id: YCellular.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindCellular(), the high-level API for Cellular functions
  *
@@ -158,6 +158,12 @@ public class YCellular extends YFunction
         //--- (generated code: YCellular attributes initialization)
         //--- (end of generated code: YCellular attributes initialization)
     }
+
+    protected YCellular(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
 
     //--- (generated code: YCellular implementation)
     @Override
@@ -762,9 +768,44 @@ public class YCellular extends YFunction
     public static YCellular FindCellular(String func)
     {
         YCellular obj;
-        obj = (YCellular) YFunction._FindFromCache(YAPI.GetYCtx(), "Cellular", func);
+        obj = (YCellular) YFunction._FindFromCache("Cellular", func);
         if (obj == null) {
-            obj = new YCellular(YAPI.GetYCtx(), func);
+            obj = new YCellular(func);
+            YFunction._AddToCache("Cellular", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a cellular interface for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the cellular interface is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YCellular.isOnline() to test if the cellular interface is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a cellular interface by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the cellular interface
+     *
+     * @return a YCellular object allowing you to drive the cellular interface.
+     */
+    public static YCellular FindCellularInContext(YAPIContext yctx,String func)
+    {
+        YCellular obj;
+        obj = (YCellular) YFunction._FindFromCache(yctx, "Cellular", func);
+        if (obj == null) {
+            obj = new YCellular(yctx, func);
             YFunction._AddToCache("Cellular", func, obj);
         }
         return obj;
@@ -1052,41 +1093,7 @@ public class YCellular extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindCellular(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a cellular interface for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the cellular interface is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YCellular.isOnline() to test if the cellular interface is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a cellular interface by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the cellular interface
-     *
-     * @return a YCellular object allowing you to drive the cellular interface.
-     */
-    public static YCellular FindCellular(String func, YAPIContext yapi_obj)
-    {
-        YCellular obj;
-        obj = (YCellular) YFunction._FindFromCache(yapi_obj, "Cellular", func);
-        if (obj == null) {
-            obj = new YCellular(yapi_obj, func);
-            YFunction._AddToCache("Cellular", func, obj);
-        }
-        return obj;
+        return FindCellularInContext(_yapi, next_hwid);
     }
 
     /**
@@ -1103,7 +1110,7 @@ public class YCellular extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Cellular");
         if (next_hwid == null)  return null;
-        return FindCellular(next_hwid, yctx);
+        return FindCellularInContext(yctx, next_hwid);
     }
 
     /**
@@ -1111,15 +1118,17 @@ public class YCellular extends YFunction
      * Use the method YCellular.nextCellular() to iterate on
      * next cellular interfaces.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YCellular object, corresponding to
      *         the first cellular interface currently online, or a null pointer
      *         if there are none.
      */
-    public static YCellular FirstCellular(YAPIContext yapi)
+    public static YCellular FirstCellularInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Cellular");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Cellular");
         if (next_hwid == null)  return null;
-        return FindCellular(next_hwid, yapi);
+        return FindCellularInContext(yctx, next_hwid);
     }
 
     //--- (end of generated code: YCellular implementation)

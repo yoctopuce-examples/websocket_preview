@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YAccelerometer.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindAccelerometer(), the high-level API for Accelerometer functions
  *
@@ -125,6 +125,15 @@ public class YAccelerometer extends YSensor
         _className = "Accelerometer";
         //--- (YAccelerometer attributes initialization)
         //--- (end of YAccelerometer attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YAccelerometer(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YAccelerometer implementation)
@@ -293,9 +302,44 @@ public class YAccelerometer extends YSensor
     public static YAccelerometer FindAccelerometer(String func)
     {
         YAccelerometer obj;
-        obj = (YAccelerometer) YFunction._FindFromCache(YAPI.GetYCtx(), "Accelerometer", func);
+        obj = (YAccelerometer) YFunction._FindFromCache("Accelerometer", func);
         if (obj == null) {
-            obj = new YAccelerometer(YAPI.GetYCtx(), func);
+            obj = new YAccelerometer(func);
+            YFunction._AddToCache("Accelerometer", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves an accelerometer for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the accelerometer is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YAccelerometer.isOnline() to test if the accelerometer is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * an accelerometer by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the accelerometer
+     *
+     * @return a YAccelerometer object allowing you to drive the accelerometer.
+     */
+    public static YAccelerometer FindAccelerometerInContext(YAPIContext yctx,String func)
+    {
+        YAccelerometer obj;
+        obj = (YAccelerometer) YFunction._FindFromCache(yctx, "Accelerometer", func);
+        if (obj == null) {
+            obj = new YAccelerometer(yctx, func);
             YFunction._AddToCache("Accelerometer", func, obj);
         }
         return obj;
@@ -392,41 +436,7 @@ public class YAccelerometer extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindAccelerometer(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves an accelerometer for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the accelerometer is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YAccelerometer.isOnline() to test if the accelerometer is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * an accelerometer by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the accelerometer
-     *
-     * @return a YAccelerometer object allowing you to drive the accelerometer.
-     */
-    public static YAccelerometer FindAccelerometer(String func, YAPIContext yapi_obj)
-    {
-        YAccelerometer obj;
-        obj = (YAccelerometer) YFunction._FindFromCache(yapi_obj, "Accelerometer", func);
-        if (obj == null) {
-            obj = new YAccelerometer(yapi_obj, func);
-            YFunction._AddToCache("Accelerometer", func, obj);
-        }
-        return obj;
+        return FindAccelerometerInContext(_yapi, next_hwid);
     }
 
     /**
@@ -443,7 +453,7 @@ public class YAccelerometer extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Accelerometer");
         if (next_hwid == null)  return null;
-        return FindAccelerometer(next_hwid, yctx);
+        return FindAccelerometerInContext(yctx, next_hwid);
     }
 
     /**
@@ -451,15 +461,17 @@ public class YAccelerometer extends YSensor
      * Use the method YAccelerometer.nextAccelerometer() to iterate on
      * next accelerometers.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YAccelerometer object, corresponding to
      *         the first accelerometer currently online, or a null pointer
      *         if there are none.
      */
-    public static YAccelerometer FirstAccelerometer(YAPIContext yapi)
+    public static YAccelerometer FirstAccelerometerInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Accelerometer");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Accelerometer");
         if (next_hwid == null)  return null;
-        return FindAccelerometer(next_hwid, yapi);
+        return FindAccelerometerInContext(yctx, next_hwid);
     }
 
     //--- (end of YAccelerometer implementation)

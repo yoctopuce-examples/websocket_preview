@@ -32,7 +32,7 @@ public class YServerWebsocket
 
                     // list all devices connected on this hub (only for debug propose)
                     System.out.println("Device list:");
-                    YModule module = YModule.FirstModule(yctx);
+                    YModule module = YModule.FirstModuleInContext(yctx);
                     while (module != null) {
                         System.out.println("   " + module.get_serialNumber() + " (" + module.get_productName() + ")");
                         module = module.nextModule();
@@ -40,7 +40,7 @@ public class YServerWebsocket
 
                     // play a bit with relay output :-)
                     try {
-                        YRelay relay = YRelay.FirstRelay(yctx);
+                        YRelay relay = YRelay.FirstRelayInContext(yctx);
                         if (relay != null) {
                             relay.set_state(YRelay.STATE_A);
                             Thread.sleep(500);

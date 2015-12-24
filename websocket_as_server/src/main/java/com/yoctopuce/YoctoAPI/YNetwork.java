@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
+ * $Id: YNetwork.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindNetwork(), the high-level API for Network functions
  *
@@ -224,6 +224,15 @@ public class YNetwork extends YFunction
         _className = "Network";
         //--- (YNetwork attributes initialization)
         //--- (end of YNetwork attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YNetwork(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YNetwork implementation)
@@ -1613,9 +1622,44 @@ public class YNetwork extends YFunction
     public static YNetwork FindNetwork(String func)
     {
         YNetwork obj;
-        obj = (YNetwork) YFunction._FindFromCache(YAPI.GetYCtx(), "Network", func);
+        obj = (YNetwork) YFunction._FindFromCache("Network", func);
         if (obj == null) {
-            obj = new YNetwork(YAPI.GetYCtx(), func);
+            obj = new YNetwork(func);
+            YFunction._AddToCache("Network", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a network interface for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the network interface is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YNetwork.isOnline() to test if the network interface is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a network interface by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the network interface
+     *
+     * @return a YNetwork object allowing you to drive the network interface.
+     */
+    public static YNetwork FindNetworkInContext(YAPIContext yctx,String func)
+    {
+        YNetwork obj;
+        obj = (YNetwork) YFunction._FindFromCache(yctx, "Network", func);
+        if (obj == null) {
+            obj = new YNetwork(yctx, func);
             YFunction._AddToCache("Network", func, obj);
         }
         return obj;
@@ -1733,41 +1777,7 @@ public class YNetwork extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindNetwork(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a network interface for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the network interface is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YNetwork.isOnline() to test if the network interface is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a network interface by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the network interface
-     *
-     * @return a YNetwork object allowing you to drive the network interface.
-     */
-    public static YNetwork FindNetwork(String func, YAPIContext yapi_obj)
-    {
-        YNetwork obj;
-        obj = (YNetwork) YFunction._FindFromCache(yapi_obj, "Network", func);
-        if (obj == null) {
-            obj = new YNetwork(yapi_obj, func);
-            YFunction._AddToCache("Network", func, obj);
-        }
-        return obj;
+        return FindNetworkInContext(_yapi, next_hwid);
     }
 
     /**
@@ -1784,7 +1794,7 @@ public class YNetwork extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("Network");
         if (next_hwid == null)  return null;
-        return FindNetwork(next_hwid, yctx);
+        return FindNetworkInContext(yctx, next_hwid);
     }
 
     /**
@@ -1792,15 +1802,17 @@ public class YNetwork extends YFunction
      * Use the method YNetwork.nextNetwork() to iterate on
      * next network interfaces.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YNetwork object, corresponding to
      *         the first network interface currently online, or a null pointer
      *         if there are none.
      */
-    public static YNetwork FirstNetwork(YAPIContext yapi)
+    public static YNetwork FirstNetworkInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("Network");
+        String next_hwid = yctx._yHash.getFirstHardwareId("Network");
         if (next_hwid == null)  return null;
-        return FindNetwork(next_hwid, yapi);
+        return FindNetworkInContext(yctx, next_hwid);
     }
 
     //--- (end of YNetwork implementation)

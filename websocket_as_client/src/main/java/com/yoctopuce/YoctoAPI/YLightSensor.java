@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YLightSensor.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindLightSensor(), the high-level API for LightSensor functions
  *
@@ -111,6 +111,15 @@ public class YLightSensor extends YSensor
         _className = "LightSensor";
         //--- (YLightSensor attributes initialization)
         //--- (end of YLightSensor attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YLightSensor(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YLightSensor implementation)
@@ -257,9 +266,44 @@ public class YLightSensor extends YSensor
     public static YLightSensor FindLightSensor(String func)
     {
         YLightSensor obj;
-        obj = (YLightSensor) YFunction._FindFromCache(YAPI.GetYCtx(), "LightSensor", func);
+        obj = (YLightSensor) YFunction._FindFromCache("LightSensor", func);
         if (obj == null) {
-            obj = new YLightSensor(YAPI.GetYCtx(), func);
+            obj = new YLightSensor(func);
+            YFunction._AddToCache("LightSensor", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a light sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the light sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YLightSensor.isOnline() to test if the light sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a light sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the light sensor
+     *
+     * @return a YLightSensor object allowing you to drive the light sensor.
+     */
+    public static YLightSensor FindLightSensorInContext(YAPIContext yctx,String func)
+    {
+        YLightSensor obj;
+        obj = (YLightSensor) YFunction._FindFromCache(yctx, "LightSensor", func);
+        if (obj == null) {
+            obj = new YLightSensor(yctx, func);
             YFunction._AddToCache("LightSensor", func, obj);
         }
         return obj;
@@ -356,41 +400,7 @@ public class YLightSensor extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindLightSensor(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a light sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the light sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YLightSensor.isOnline() to test if the light sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a light sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the light sensor
-     *
-     * @return a YLightSensor object allowing you to drive the light sensor.
-     */
-    public static YLightSensor FindLightSensor(String func, YAPIContext yapi_obj)
-    {
-        YLightSensor obj;
-        obj = (YLightSensor) YFunction._FindFromCache(yapi_obj, "LightSensor", func);
-        if (obj == null) {
-            obj = new YLightSensor(yapi_obj, func);
-            YFunction._AddToCache("LightSensor", func, obj);
-        }
-        return obj;
+        return FindLightSensorInContext(_yapi, next_hwid);
     }
 
     /**
@@ -407,7 +417,7 @@ public class YLightSensor extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("LightSensor");
         if (next_hwid == null)  return null;
-        return FindLightSensor(next_hwid, yctx);
+        return FindLightSensorInContext(yctx, next_hwid);
     }
 
     /**
@@ -415,15 +425,17 @@ public class YLightSensor extends YSensor
      * Use the method YLightSensor.nextLightSensor() to iterate on
      * next light sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YLightSensor object, corresponding to
      *         the first light sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YLightSensor FirstLightSensor(YAPIContext yapi)
+    public static YLightSensor FirstLightSensorInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("LightSensor");
+        String next_hwid = yctx._yHash.getFirstHardwareId("LightSensor");
         if (next_hwid == null)  return null;
-        return FindLightSensor(next_hwid, yapi);
+        return FindLightSensorInContext(yctx, next_hwid);
     }
 
     //--- (end of YLightSensor implementation)

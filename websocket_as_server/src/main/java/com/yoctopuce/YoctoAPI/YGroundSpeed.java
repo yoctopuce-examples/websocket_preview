@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YGroundSpeed.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindGroundSpeed(), the high-level API for GroundSpeed functions
  *
@@ -100,6 +100,15 @@ public class YGroundSpeed extends YSensor
         //--- (end of YGroundSpeed attributes initialization)
     }
 
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YGroundSpeed(String func)
+    {
+        this(YAPI.GetYCtx(), func);
+    }
+
     //--- (YGroundSpeed implementation)
     @Override
     protected void  _parseAttr(JSONObject json_val) throws JSONException
@@ -133,9 +142,44 @@ public class YGroundSpeed extends YSensor
     public static YGroundSpeed FindGroundSpeed(String func)
     {
         YGroundSpeed obj;
-        obj = (YGroundSpeed) YFunction._FindFromCache(YAPI.GetYCtx(), "GroundSpeed", func);
+        obj = (YGroundSpeed) YFunction._FindFromCache("GroundSpeed", func);
         if (obj == null) {
-            obj = new YGroundSpeed(YAPI.GetYCtx(), func);
+            obj = new YGroundSpeed(func);
+            YFunction._AddToCache("GroundSpeed", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves a ground speed sensor for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the ground speed sensor is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YGroundSpeed.isOnline() to test if the ground speed sensor is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * a ground speed sensor by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the ground speed sensor
+     *
+     * @return a YGroundSpeed object allowing you to drive the ground speed sensor.
+     */
+    public static YGroundSpeed FindGroundSpeedInContext(YAPIContext yctx,String func)
+    {
+        YGroundSpeed obj;
+        obj = (YGroundSpeed) YFunction._FindFromCache(yctx, "GroundSpeed", func);
+        if (obj == null) {
+            obj = new YGroundSpeed(yctx, func);
             YFunction._AddToCache("GroundSpeed", func, obj);
         }
         return obj;
@@ -232,41 +276,7 @@ public class YGroundSpeed extends YSensor
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindGroundSpeed(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves a ground speed sensor for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the ground speed sensor is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YGroundSpeed.isOnline() to test if the ground speed sensor is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * a ground speed sensor by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the ground speed sensor
-     *
-     * @return a YGroundSpeed object allowing you to drive the ground speed sensor.
-     */
-    public static YGroundSpeed FindGroundSpeed(String func, YAPIContext yapi_obj)
-    {
-        YGroundSpeed obj;
-        obj = (YGroundSpeed) YFunction._FindFromCache(yapi_obj, "GroundSpeed", func);
-        if (obj == null) {
-            obj = new YGroundSpeed(yapi_obj, func);
-            YFunction._AddToCache("GroundSpeed", func, obj);
-        }
-        return obj;
+        return FindGroundSpeedInContext(_yapi, next_hwid);
     }
 
     /**
@@ -283,7 +293,7 @@ public class YGroundSpeed extends YSensor
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("GroundSpeed");
         if (next_hwid == null)  return null;
-        return FindGroundSpeed(next_hwid, yctx);
+        return FindGroundSpeedInContext(yctx, next_hwid);
     }
 
     /**
@@ -291,15 +301,17 @@ public class YGroundSpeed extends YSensor
      * Use the method YGroundSpeed.nextGroundSpeed() to iterate on
      * next ground speed sensors.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YGroundSpeed object, corresponding to
      *         the first ground speed sensor currently online, or a null pointer
      *         if there are none.
      */
-    public static YGroundSpeed FirstGroundSpeed(YAPIContext yapi)
+    public static YGroundSpeed FirstGroundSpeedInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("GroundSpeed");
+        String next_hwid = yctx._yHash.getFirstHardwareId("GroundSpeed");
         if (next_hwid == null)  return null;
-        return FindGroundSpeed(next_hwid, yapi);
+        return FindGroundSpeedInContext(yctx, next_hwid);
     }
 
     //--- (end of YGroundSpeed implementation)

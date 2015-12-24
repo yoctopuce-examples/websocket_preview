@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: pic24config.php 22044 2015-11-19 08:39:20Z mvuilleu $
+ * $Id: YAnButton.java 22530 2015-12-24 10:52:06Z seb $
  *
  * Implements FindAnButton(), the high-level API for AnButton functions
  *
@@ -158,6 +158,15 @@ public class YAnButton extends YFunction
         _className = "AnButton";
         //--- (YAnButton attributes initialization)
         //--- (end of YAnButton attributes initialization)
+    }
+
+    /**
+     *
+     * @param func : functionid
+     */
+    protected YAnButton(String func)
+    {
+        this(YAPI.GetYCtx(), func);
     }
 
     //--- (YAnButton implementation)
@@ -732,9 +741,44 @@ public class YAnButton extends YFunction
     public static YAnButton FindAnButton(String func)
     {
         YAnButton obj;
-        obj = (YAnButton) YFunction._FindFromCache(YAPI.GetYCtx(), "AnButton", func);
+        obj = (YAnButton) YFunction._FindFromCache("AnButton", func);
         if (obj == null) {
-            obj = new YAnButton(YAPI.GetYCtx(), func);
+            obj = new YAnButton(func);
+            YFunction._AddToCache("AnButton", func, obj);
+        }
+        return obj;
+    }
+
+    /**
+     * Retrieves an analog input for a given identifier in a YAPI context.
+     * The identifier can be specified using several formats:
+     * <ul>
+     * <li>FunctionLogicalName</li>
+     * <li>ModuleSerialNumber.FunctionIdentifier</li>
+     * <li>ModuleSerialNumber.FunctionLogicalName</li>
+     * <li>ModuleLogicalName.FunctionIdentifier</li>
+     * <li>ModuleLogicalName.FunctionLogicalName</li>
+     * </ul>
+     *
+     * This function does not require that the analog input is online at the time
+     * it is invoked. The returned object is nevertheless valid.
+     * Use the method YAnButton.isOnline() to test if the analog input is
+     * indeed online at a given time. In case of ambiguity when looking for
+     * an analog input by logical name, no error is notified: the first instance
+     * found is returned. The search is performed first by hardware name,
+     * then by logical name.
+     *
+     * @param yctx : a YAPI context
+     * @param func : a string that uniquely characterizes the analog input
+     *
+     * @return a YAnButton object allowing you to drive the analog input.
+     */
+    public static YAnButton FindAnButtonInContext(YAPIContext yctx,String func)
+    {
+        YAnButton obj;
+        obj = (YAnButton) YFunction._FindFromCache(yctx, "AnButton", func);
+        if (obj == null) {
+            obj = new YAnButton(yctx, func);
             YFunction._AddToCache("AnButton", func, obj);
         }
         return obj;
@@ -810,41 +854,7 @@ public class YAnButton extends YFunction
             next_hwid = null;
         }
         if(next_hwid == null) return null;
-        return FindAnButton(next_hwid, _yapi);
-    }
-
-    /**
-     * Retrieves an analog input for a given identifier.
-     * The identifier can be specified using several formats:
-     * <ul>
-     * <li>FunctionLogicalName</li>
-     * <li>ModuleSerialNumber.FunctionIdentifier</li>
-     * <li>ModuleSerialNumber.FunctionLogicalName</li>
-     * <li>ModuleLogicalName.FunctionIdentifier</li>
-     * <li>ModuleLogicalName.FunctionLogicalName</li>
-     * </ul>
-     *
-     * This function does not require that the analog input is online at the time
-     * it is invoked. The returned object is nevertheless valid.
-     * Use the method YAnButton.isOnline() to test if the analog input is
-     * indeed online at a given time. In case of ambiguity when looking for
-     * an analog input by logical name, no error is notified: the first instance
-     * found is returned. The search is performed first by hardware name,
-     * then by logical name.
-     *
-     * @param func : a string that uniquely characterizes the analog input
-     *
-     * @return a YAnButton object allowing you to drive the analog input.
-     */
-    public static YAnButton FindAnButton(String func, YAPIContext yapi_obj)
-    {
-        YAnButton obj;
-        obj = (YAnButton) YFunction._FindFromCache(yapi_obj, "AnButton", func);
-        if (obj == null) {
-            obj = new YAnButton(yapi_obj, func);
-            YFunction._AddToCache("AnButton", func, obj);
-        }
-        return obj;
+        return FindAnButtonInContext(_yapi, next_hwid);
     }
 
     /**
@@ -861,7 +871,7 @@ public class YAnButton extends YFunction
         YAPIContext yctx = YAPI.GetYCtx();
         String next_hwid = yctx._yHash.getFirstHardwareId("AnButton");
         if (next_hwid == null)  return null;
-        return FindAnButton(next_hwid, yctx);
+        return FindAnButtonInContext(yctx, next_hwid);
     }
 
     /**
@@ -869,15 +879,17 @@ public class YAnButton extends YFunction
      * Use the method YAnButton.nextAnButton() to iterate on
      * next analog inputs.
      *
+     * @param yctx : a YAPI context.
+     *
      * @return a pointer to a YAnButton object, corresponding to
      *         the first analog input currently online, or a null pointer
      *         if there are none.
      */
-    public static YAnButton FirstAnButton(YAPIContext yapi)
+    public static YAnButton FirstAnButtonInContext(YAPIContext yctx)
     {
-        String next_hwid = yapi._yHash.getFirstHardwareId("AnButton");
+        String next_hwid = yctx._yHash.getFirstHardwareId("AnButton");
         if (next_hwid == null)  return null;
-        return FindAnButton(next_hwid, yapi);
+        return FindAnButtonInContext(yctx, next_hwid);
     }
 
     //--- (end of YAnButton implementation)
