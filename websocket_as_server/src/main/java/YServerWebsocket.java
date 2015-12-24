@@ -1,5 +1,3 @@
-//import com.yoctopuce.YoctoAPI.YAPIContext;
-
 import com.yoctopuce.YoctoAPI.YAPIContext;
 import com.yoctopuce.YoctoAPI.YAPI_Exception;
 import com.yoctopuce.YoctoAPI.YModule;
@@ -28,7 +26,7 @@ public class YServerWebsocket
                 YAPIContext yctx = new YAPIContext();
                 try {
                     // register the YoctoHub/VirtualHub that start the connection
-                    yctx.RegisterHubCallback(session);
+                    yctx.RegisterHubWebSocketCallback(session);
 
                     // list all devices connected on this hub (only for debug propose)
                     System.out.println("Device list:");

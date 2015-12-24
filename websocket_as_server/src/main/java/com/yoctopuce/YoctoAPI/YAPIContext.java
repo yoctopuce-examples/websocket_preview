@@ -803,7 +803,7 @@ public class YAPIContext
     }
 
 
-    public int RegisterHubCallback(Session session) throws YAPI_Exception
+    public int RegisterHubWebSocketCallback(Session session) throws YAPI_Exception
     {
         _AddNewHub("ws://callback", true, null, null, session);
         // Register device list
