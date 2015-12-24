@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YColorLed.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindColorLed(), the high-level API for ColorLed functions
  *
@@ -689,7 +689,7 @@ public class YColorLed extends YFunction
     public static YColorLed FindColorLedInContext(YAPIContext yctx,String func)
     {
         YColorLed obj;
-        obj = (YColorLed) YFunction._FindFromCache(yctx, "ColorLed", func);
+        obj = (YColorLed) YFunction._FindFromCacheInContext(yctx, "ColorLed", func);
         if (obj == null) {
             obj = new YColorLed(yctx, func);
             YFunction._AddToCache("ColorLed", func, obj);

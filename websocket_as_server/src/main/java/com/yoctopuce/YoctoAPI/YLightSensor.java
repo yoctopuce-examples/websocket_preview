@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YLightSensor.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindLightSensor(), the high-level API for LightSensor functions
  *
@@ -301,7 +301,7 @@ public class YLightSensor extends YSensor
     public static YLightSensor FindLightSensorInContext(YAPIContext yctx,String func)
     {
         YLightSensor obj;
-        obj = (YLightSensor) YFunction._FindFromCache(yctx, "LightSensor", func);
+        obj = (YLightSensor) YFunction._FindFromCacheInContext(yctx, "LightSensor", func);
         if (obj == null) {
             obj = new YLightSensor(yctx, func);
             YFunction._AddToCache("LightSensor", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YWakeUpSchedule.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindWakeUpSchedule(), the high-level API for WakeUpSchedule functions
  *
@@ -620,7 +620,7 @@ public class YWakeUpSchedule extends YFunction
     public static YWakeUpSchedule FindWakeUpScheduleInContext(YAPIContext yctx,String func)
     {
         YWakeUpSchedule obj;
-        obj = (YWakeUpSchedule) YFunction._FindFromCache(yctx, "WakeUpSchedule", func);
+        obj = (YWakeUpSchedule) YFunction._FindFromCacheInContext(yctx, "WakeUpSchedule", func);
         if (obj == null) {
             obj = new YWakeUpSchedule(yctx, func);
             YFunction._AddToCache("WakeUpSchedule", func, obj);

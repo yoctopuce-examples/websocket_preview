@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YTilt.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindTilt(), the high-level API for Tilt functions
  *
@@ -214,7 +214,7 @@ public class YTilt extends YSensor
     public static YTilt FindTiltInContext(YAPIContext yctx,String func)
     {
         YTilt obj;
-        obj = (YTilt) YFunction._FindFromCache(yctx, "Tilt", func);
+        obj = (YTilt) YFunction._FindFromCacheInContext(yctx, "Tilt", func);
         if (obj == null) {
             obj = new YTilt(yctx, func);
             YFunction._AddToCache("Tilt", func, obj);

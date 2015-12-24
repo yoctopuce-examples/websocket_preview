@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YPwmInput.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindPwmInput(), the high-level API for PwmInput functions
  *
@@ -507,7 +507,7 @@ public class YPwmInput extends YSensor
     public static YPwmInput FindPwmInputInContext(YAPIContext yctx,String func)
     {
         YPwmInput obj;
-        obj = (YPwmInput) YFunction._FindFromCache(yctx, "PwmInput", func);
+        obj = (YPwmInput) YFunction._FindFromCacheInContext(yctx, "PwmInput", func);
         if (obj == null) {
             obj = new YPwmInput(yctx, func);
             YFunction._AddToCache("PwmInput", func, obj);

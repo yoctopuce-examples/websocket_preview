@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YVoc.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindVoc(), the high-level API for Voc functions
  *
@@ -176,7 +176,7 @@ public class YVoc extends YSensor
     public static YVoc FindVocInContext(YAPIContext yctx,String func)
     {
         YVoc obj;
-        obj = (YVoc) YFunction._FindFromCache(yctx, "Voc", func);
+        obj = (YVoc) YFunction._FindFromCacheInContext(yctx, "Voc", func);
         if (obj == null) {
             obj = new YVoc(yctx, func);
             YFunction._AddToCache("Voc", func, obj);

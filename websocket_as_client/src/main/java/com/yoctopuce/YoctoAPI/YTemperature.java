@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YTemperature.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindTemperature(), the high-level API for Temperature functions
  *
@@ -376,7 +376,7 @@ public class YTemperature extends YSensor
     public static YTemperature FindTemperatureInContext(YAPIContext yctx,String func)
     {
         YTemperature obj;
-        obj = (YTemperature) YFunction._FindFromCache(yctx, "Temperature", func);
+        obj = (YTemperature) YFunction._FindFromCacheInContext(yctx, "Temperature", func);
         if (obj == null) {
             obj = new YTemperature(yctx, func);
             YFunction._AddToCache("Temperature", func, obj);

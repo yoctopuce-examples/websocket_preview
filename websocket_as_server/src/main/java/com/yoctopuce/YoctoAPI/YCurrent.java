@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YCurrent.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindCurrent(), the high-level API for Current functions
  *
@@ -176,7 +176,7 @@ public class YCurrent extends YSensor
     public static YCurrent FindCurrentInContext(YAPIContext yctx,String func)
     {
         YCurrent obj;
-        obj = (YCurrent) YFunction._FindFromCache(yctx, "Current", func);
+        obj = (YCurrent) YFunction._FindFromCacheInContext(yctx, "Current", func);
         if (obj == null) {
             obj = new YCurrent(yctx, func);
             YFunction._AddToCache("Current", func, obj);

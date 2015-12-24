@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YBuzzer.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindBuzzer(), the high-level API for Buzzer functions
  *
@@ -470,7 +470,7 @@ public class YBuzzer extends YFunction
     public static YBuzzer FindBuzzerInContext(YAPIContext yctx,String func)
     {
         YBuzzer obj;
-        obj = (YBuzzer) YFunction._FindFromCache(yctx, "Buzzer", func);
+        obj = (YBuzzer) YFunction._FindFromCacheInContext(yctx, "Buzzer", func);
         if (obj == null) {
             obj = new YBuzzer(yctx, func);
             YFunction._AddToCache("Buzzer", func, obj);

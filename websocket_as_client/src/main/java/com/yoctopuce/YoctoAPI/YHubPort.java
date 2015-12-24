@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YHubPort.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindHubPort(), the high-level API for HubPort functions
  *
@@ -336,7 +336,7 @@ public class YHubPort extends YFunction
     public static YHubPort FindHubPortInContext(YAPIContext yctx,String func)
     {
         YHubPort obj;
-        obj = (YHubPort) YFunction._FindFromCache(yctx, "HubPort", func);
+        obj = (YHubPort) YFunction._FindFromCacheInContext(yctx, "HubPort", func);
         if (obj == null) {
             obj = new YHubPort(yctx, func);
             YFunction._AddToCache("HubPort", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YAudioIn.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindAudioIn(), the high-level API for AudioIn functions
  *
@@ -430,7 +430,7 @@ public class YAudioIn extends YFunction
     public static YAudioIn FindAudioInInContext(YAPIContext yctx,String func)
     {
         YAudioIn obj;
-        obj = (YAudioIn) YFunction._FindFromCache(yctx, "AudioIn", func);
+        obj = (YAudioIn) YFunction._FindFromCacheInContext(yctx, "AudioIn", func);
         if (obj == null) {
             obj = new YAudioIn(yctx, func);
             YFunction._AddToCache("AudioIn", func, obj);

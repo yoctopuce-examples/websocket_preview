@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YSerialPort.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindSerialPort(), the high-level API for SerialPort functions
  *
@@ -868,7 +868,7 @@ public class YSerialPort extends YFunction
     public static YSerialPort FindSerialPortInContext(YAPIContext yctx,String func)
     {
         YSerialPort obj;
-        obj = (YSerialPort) YFunction._FindFromCache(yctx, "SerialPort", func);
+        obj = (YSerialPort) YFunction._FindFromCacheInContext(yctx, "SerialPort", func);
         if (obj == null) {
             obj = new YSerialPort(yctx, func);
             YFunction._AddToCache("SerialPort", func, obj);

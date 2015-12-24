@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YServo.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindServo(), the high-level API for Servo functions
  *
@@ -695,7 +695,7 @@ public class YServo extends YFunction
     public static YServo FindServoInContext(YAPIContext yctx,String func)
     {
         YServo obj;
-        obj = (YServo) YFunction._FindFromCache(yctx, "Servo", func);
+        obj = (YServo) YFunction._FindFromCacheInContext(yctx, "Servo", func);
         if (obj == null) {
             obj = new YServo(yctx, func);
             YFunction._AddToCache("Servo", func, obj);

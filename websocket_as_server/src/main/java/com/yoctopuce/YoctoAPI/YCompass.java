@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YCompass.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindCompass(), the high-level API for Compass functions
  *
@@ -251,7 +251,7 @@ public class YCompass extends YSensor
     public static YCompass FindCompassInContext(YAPIContext yctx,String func)
     {
         YCompass obj;
-        obj = (YCompass) YFunction._FindFromCache(yctx, "Compass", func);
+        obj = (YCompass) YFunction._FindFromCacheInContext(yctx, "Compass", func);
         if (obj == null) {
             obj = new YCompass(yctx, func);
             YFunction._AddToCache("Compass", func, obj);

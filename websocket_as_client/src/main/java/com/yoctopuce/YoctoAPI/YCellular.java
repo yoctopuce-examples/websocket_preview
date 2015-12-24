@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YCellular.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: YCellular.java 22543 2015-12-24 12:16:21Z seb $
  *
  * Implements FindCellular(), the high-level API for Cellular functions
  *
@@ -803,7 +803,7 @@ public class YCellular extends YFunction
     public static YCellular FindCellularInContext(YAPIContext yctx,String func)
     {
         YCellular obj;
-        obj = (YCellular) YFunction._FindFromCache(yctx, "Cellular", func);
+        obj = (YCellular) YFunction._FindFromCacheInContext(yctx, "Cellular", func);
         if (obj == null) {
             obj = new YCellular(yctx, func);
             YFunction._AddToCache("Cellular", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YWakeUpMonitor.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindWakeUpMonitor(), the high-level API for WakeUpMonitor functions
  *
@@ -511,7 +511,7 @@ public class YWakeUpMonitor extends YFunction
     public static YWakeUpMonitor FindWakeUpMonitorInContext(YAPIContext yctx,String func)
     {
         YWakeUpMonitor obj;
-        obj = (YWakeUpMonitor) YFunction._FindFromCache(yctx, "WakeUpMonitor", func);
+        obj = (YWakeUpMonitor) YFunction._FindFromCacheInContext(yctx, "WakeUpMonitor", func);
         if (obj == null) {
             obj = new YWakeUpMonitor(yctx, func);
             YFunction._AddToCache("WakeUpMonitor", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YVoltage.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindVoltage(), the high-level API for Voltage functions
  *
@@ -176,7 +176,7 @@ public class YVoltage extends YSensor
     public static YVoltage FindVoltageInContext(YAPIContext yctx,String func)
     {
         YVoltage obj;
-        obj = (YVoltage) YFunction._FindFromCache(yctx, "Voltage", func);
+        obj = (YVoltage) YFunction._FindFromCacheInContext(yctx, "Voltage", func);
         if (obj == null) {
             obj = new YVoltage(yctx, func);
             YFunction._AddToCache("Voltage", func, obj);

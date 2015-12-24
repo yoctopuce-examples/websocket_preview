@@ -802,7 +802,21 @@ public class YAPIContext
         return YAPI.SUCCESS;
     }
 
+    /**
+     *
+     */
+    public int RegisterHubHTTPCallback(InputStream request, OutputStream response) throws YAPI_Exception
+    {
+        _AddNewHub("http://callback", true, request, response, null);
+        // Register device list
+        _updateDeviceList_internal(true, false);
+        return YAPI.SUCCESS;
+    }
 
+
+    /**
+     *
+     */
     public int RegisterHubWebSocketCallback(Session session) throws YAPI_Exception
     {
         _AddNewHub("ws://callback", true, null, null, session);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YAudioOut.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindAudioOut(), the high-level API for AudioOut functions
  *
@@ -430,7 +430,7 @@ public class YAudioOut extends YFunction
     public static YAudioOut FindAudioOutInContext(YAPIContext yctx,String func)
     {
         YAudioOut obj;
-        obj = (YAudioOut) YFunction._FindFromCache(yctx, "AudioOut", func);
+        obj = (YAudioOut) YFunction._FindFromCacheInContext(yctx, "AudioOut", func);
         if (obj == null) {
             obj = new YAudioOut(yctx, func);
             YFunction._AddToCache("AudioOut", func, obj);

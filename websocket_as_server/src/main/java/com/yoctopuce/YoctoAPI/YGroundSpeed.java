@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YGroundSpeed.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindGroundSpeed(), the high-level API for GroundSpeed functions
  *
@@ -177,7 +177,7 @@ public class YGroundSpeed extends YSensor
     public static YGroundSpeed FindGroundSpeedInContext(YAPIContext yctx,String func)
     {
         YGroundSpeed obj;
-        obj = (YGroundSpeed) YFunction._FindFromCache(yctx, "GroundSpeed", func);
+        obj = (YGroundSpeed) YFunction._FindFromCacheInContext(yctx, "GroundSpeed", func);
         if (obj == null) {
             obj = new YGroundSpeed(yctx, func);
             YFunction._AddToCache("GroundSpeed", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YSegmentedDisplay.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindSegmentedDisplay(), the high-level API for SegmentedDisplay functions
  *
@@ -287,7 +287,7 @@ public class YSegmentedDisplay extends YFunction
     public static YSegmentedDisplay FindSegmentedDisplayInContext(YAPIContext yctx,String func)
     {
         YSegmentedDisplay obj;
-        obj = (YSegmentedDisplay) YFunction._FindFromCache(yctx, "SegmentedDisplay", func);
+        obj = (YSegmentedDisplay) YFunction._FindFromCacheInContext(yctx, "SegmentedDisplay", func);
         if (obj == null) {
             obj = new YSegmentedDisplay(yctx, func);
             YFunction._AddToCache("SegmentedDisplay", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YOsControl.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindOsControl(), the high-level API for OsControl functions
  *
@@ -229,7 +229,7 @@ public class YOsControl extends YFunction
     public static YOsControl FindOsControlInContext(YAPIContext yctx,String func)
     {
         YOsControl obj;
-        obj = (YOsControl) YFunction._FindFromCache(yctx, "OsControl", func);
+        obj = (YOsControl) YFunction._FindFromCacheInContext(yctx, "OsControl", func);
         if (obj == null) {
             obj = new YOsControl(yctx, func);
             YFunction._AddToCache("OsControl", func, obj);

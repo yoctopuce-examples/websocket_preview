@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YPower.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindPower(), the high-level API for Power functions
  *
@@ -309,7 +309,7 @@ public class YPower extends YSensor
     public static YPower FindPowerInContext(YAPIContext yctx,String func)
     {
         YPower obj;
-        obj = (YPower) YFunction._FindFromCache(yctx, "Power", func);
+        obj = (YPower) YFunction._FindFromCacheInContext(yctx, "Power", func);
         if (obj == null) {
             obj = new YPower(yctx, func);
             YFunction._AddToCache("Power", func, obj);

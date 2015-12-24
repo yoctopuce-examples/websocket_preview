@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YRealTimeClock.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindRealTimeClock(), the high-level API for RealTimeClock functions
  *
@@ -394,7 +394,7 @@ public class YRealTimeClock extends YFunction
     public static YRealTimeClock FindRealTimeClockInContext(YAPIContext yctx,String func)
     {
         YRealTimeClock obj;
-        obj = (YRealTimeClock) YFunction._FindFromCache(yctx, "RealTimeClock", func);
+        obj = (YRealTimeClock) YFunction._FindFromCacheInContext(yctx, "RealTimeClock", func);
         if (obj == null) {
             obj = new YRealTimeClock(yctx, func);
             YFunction._AddToCache("RealTimeClock", func, obj);

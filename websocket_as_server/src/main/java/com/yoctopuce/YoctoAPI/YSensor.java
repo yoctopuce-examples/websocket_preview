@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YSensor.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: YSensor.java 22543 2015-12-24 12:16:21Z seb $
  *
  * Implements yFindSensor(), the high-level API for Sensor functions
  *
@@ -883,7 +883,7 @@ public class YSensor extends YFunction
     public static YSensor FindSensorInContext(YAPIContext yctx,String func)
     {
         YSensor obj;
-        obj = (YSensor) YFunction._FindFromCache(yctx, "Sensor", func);
+        obj = (YSensor) YFunction._FindFromCacheInContext(yctx, "Sensor", func);
         if (obj == null) {
             obj = new YSensor(yctx, func);
             YFunction._AddToCache("Sensor", func, obj);

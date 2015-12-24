@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YLatitude.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindLatitude(), the high-level API for Latitude functions
  *
@@ -177,7 +177,7 @@ public class YLatitude extends YSensor
     public static YLatitude FindLatitudeInContext(YAPIContext yctx,String func)
     {
         YLatitude obj;
-        obj = (YLatitude) YFunction._FindFromCache(yctx, "Latitude", func);
+        obj = (YLatitude) YFunction._FindFromCacheInContext(yctx, "Latitude", func);
         if (obj == null) {
             obj = new YLatitude(yctx, func);
             YFunction._AddToCache("Latitude", func, obj);

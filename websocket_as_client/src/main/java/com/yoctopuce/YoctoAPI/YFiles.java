@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YFiles.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: YFiles.java 22543 2015-12-24 12:16:21Z seb $
  *
  * Implements yFindFiles(), the high-level API for Files functions
  *
@@ -247,7 +247,7 @@ public class YFiles extends YFunction
     public static YFiles FindFilesInContext(YAPIContext yctx,String func)
     {
         YFiles obj;
-        obj = (YFiles) YFunction._FindFromCache(yctx, "Files", func);
+        obj = (YFiles) YFunction._FindFromCacheInContext(yctx, "Files", func);
         if (obj == null) {
             obj = new YFiles(yctx, func);
             YFunction._AddToCache("Files", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YAccelerometer.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindAccelerometer(), the high-level API for Accelerometer functions
  *
@@ -337,7 +337,7 @@ public class YAccelerometer extends YSensor
     public static YAccelerometer FindAccelerometerInContext(YAPIContext yctx,String func)
     {
         YAccelerometer obj;
-        obj = (YAccelerometer) YFunction._FindFromCache(yctx, "Accelerometer", func);
+        obj = (YAccelerometer) YFunction._FindFromCacheInContext(yctx, "Accelerometer", func);
         if (obj == null) {
             obj = new YAccelerometer(yctx, func);
             YFunction._AddToCache("Accelerometer", func, obj);

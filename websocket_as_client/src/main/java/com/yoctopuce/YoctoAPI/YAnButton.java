@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YAnButton.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindAnButton(), the high-level API for AnButton functions
  *
@@ -776,7 +776,7 @@ public class YAnButton extends YFunction
     public static YAnButton FindAnButtonInContext(YAPIContext yctx,String func)
     {
         YAnButton obj;
-        obj = (YAnButton) YFunction._FindFromCache(yctx, "AnButton", func);
+        obj = (YAnButton) YFunction._FindFromCacheInContext(yctx, "AnButton", func);
         if (obj == null) {
             obj = new YAnButton(yctx, func);
             YFunction._AddToCache("AnButton", func, obj);

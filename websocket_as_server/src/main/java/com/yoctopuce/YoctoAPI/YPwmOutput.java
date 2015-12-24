@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YPwmOutput.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindPwmOutput(), the high-level API for PwmOutput functions
  *
@@ -711,7 +711,7 @@ public class YPwmOutput extends YFunction
     public static YPwmOutput FindPwmOutputInContext(YAPIContext yctx,String func)
     {
         YPwmOutput obj;
-        obj = (YPwmOutput) YFunction._FindFromCache(yctx, "PwmOutput", func);
+        obj = (YPwmOutput) YFunction._FindFromCacheInContext(yctx, "PwmOutput", func);
         if (obj == null) {
             obj = new YPwmOutput(yctx, func);
             YFunction._AddToCache("PwmOutput", func, obj);

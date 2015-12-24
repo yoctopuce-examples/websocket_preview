@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YDualPower.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindDualPower(), the high-level API for DualPower functions
  *
@@ -336,7 +336,7 @@ public class YDualPower extends YFunction
     public static YDualPower FindDualPowerInContext(YAPIContext yctx,String func)
     {
         YDualPower obj;
-        obj = (YDualPower) YFunction._FindFromCache(yctx, "DualPower", func);
+        obj = (YDualPower) YFunction._FindFromCacheInContext(yctx, "DualPower", func);
         if (obj == null) {
             obj = new YDualPower(yctx, func);
             YFunction._AddToCache("DualPower", func, obj);

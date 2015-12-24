@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: YModule.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: YModule.java 22543 2015-12-24 12:16:21Z seb $
  *
  * YModule Class: Module control interface
  *
@@ -930,7 +930,7 @@ public class YModule extends YFunction
     public static YModule FindModuleInContext(YAPIContext yctx,String func)
     {
         YModule obj;
-        obj = (YModule) YFunction._FindFromCache(yctx, "Module", func);
+        obj = (YModule) YFunction._FindFromCacheInContext(yctx, "Module", func);
         if (obj == null) {
             obj = new YModule(yctx, func);
             YFunction._AddToCache("Module", func, obj);

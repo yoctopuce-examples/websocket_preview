@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YGps.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindGps(), the high-level API for Gps functions
  *
@@ -754,7 +754,7 @@ public class YGps extends YFunction
     public static YGps FindGpsInContext(YAPIContext yctx,String func)
     {
         YGps obj;
-        obj = (YGps) YFunction._FindFromCache(yctx, "Gps", func);
+        obj = (YGps) YFunction._FindFromCacheInContext(yctx, "Gps", func);
         if (obj == null) {
             obj = new YGps(yctx, func);
             YFunction._AddToCache("Gps", func, obj);

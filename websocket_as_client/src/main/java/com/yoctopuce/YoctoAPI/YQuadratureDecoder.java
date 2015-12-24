@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YQuadratureDecoder.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindQuadratureDecoder(), the high-level API for QuadratureDecoder functions
  *
@@ -320,7 +320,7 @@ public class YQuadratureDecoder extends YSensor
     public static YQuadratureDecoder FindQuadratureDecoderInContext(YAPIContext yctx,String func)
     {
         YQuadratureDecoder obj;
-        obj = (YQuadratureDecoder) YFunction._FindFromCache(yctx, "QuadratureDecoder", func);
+        obj = (YQuadratureDecoder) YFunction._FindFromCacheInContext(yctx, "QuadratureDecoder", func);
         if (obj == null) {
             obj = new YQuadratureDecoder(yctx, func);
             YFunction._AddToCache("QuadratureDecoder", func, obj);

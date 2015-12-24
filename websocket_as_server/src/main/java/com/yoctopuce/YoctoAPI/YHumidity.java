@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YHumidity.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindHumidity(), the high-level API for Humidity functions
  *
@@ -293,7 +293,7 @@ public class YHumidity extends YSensor
     public static YHumidity FindHumidityInContext(YAPIContext yctx,String func)
     {
         YHumidity obj;
-        obj = (YHumidity) YFunction._FindFromCache(yctx, "Humidity", func);
+        obj = (YHumidity) YFunction._FindFromCacheInContext(yctx, "Humidity", func);
         if (obj == null) {
             obj = new YHumidity(yctx, func);
             YFunction._AddToCache("Humidity", func, obj);

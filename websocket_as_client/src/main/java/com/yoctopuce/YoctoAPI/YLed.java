@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YLed.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindLed(), the high-level API for Led functions
  *
@@ -391,7 +391,7 @@ public class YLed extends YFunction
     public static YLed FindLedInContext(YAPIContext yctx,String func)
     {
         YLed obj;
-        obj = (YLed) YFunction._FindFromCache(yctx, "Led", func);
+        obj = (YLed) YFunction._FindFromCacheInContext(yctx, "Led", func);
         if (obj == null) {
             obj = new YLed(yctx, func);
             YFunction._AddToCache("Led", func, obj);

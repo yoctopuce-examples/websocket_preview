@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YDigitalIO.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindDigitalIO(), the high-level API for DigitalIO functions
  *
@@ -626,7 +626,7 @@ public class YDigitalIO extends YFunction
     public static YDigitalIO FindDigitalIOInContext(YAPIContext yctx,String func)
     {
         YDigitalIO obj;
-        obj = (YDigitalIO) YFunction._FindFromCache(yctx, "DigitalIO", func);
+        obj = (YDigitalIO) YFunction._FindFromCacheInContext(yctx, "DigitalIO", func);
         if (obj == null) {
             obj = new YDigitalIO(yctx, func);
             YFunction._AddToCache("DigitalIO", func, obj);

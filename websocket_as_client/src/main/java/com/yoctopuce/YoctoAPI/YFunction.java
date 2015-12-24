@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: YFunction.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: YFunction.java 22543 2015-12-24 12:16:21Z seb $
  *
  * YFunction Class (virtual class, used internally)
  *
@@ -158,7 +158,7 @@ public class YFunction
         throw new YAPI_Exception(error, message);
     }
 
-    protected static YFunction _FindFromCache(YAPIContext yctx, String className, String func)
+    protected static YFunction _FindFromCacheInContext(YAPIContext yctx, String className, String func)
     {
         return yctx._yHash.getFunction(className, func);
     }
@@ -175,18 +175,15 @@ public class YFunction
         obj._yapi._yHash.setFunction(className, func, obj);
     }
 
-
     protected static void _UpdateValueCallbackList(YFunction func, boolean add)
     {
         func._yapi._UpdateValueCallbackList(func, add);
     }
 
-
     protected static void _UpdateTimedReportCallbackList(YFunction func, boolean add)
     {
         func._yapi._UpdateTimedReportCallbackList(func, add);
     }
-
 
     //--- (generated code: YFunction implementation)
     protected void  _parseAttr(JSONObject json_val) throws JSONException
@@ -370,7 +367,7 @@ public class YFunction
     public static YFunction FindFunctionInContext(YAPIContext yctx,String func)
     {
         YFunction obj;
-        obj = (YFunction) YFunction._FindFromCache(yctx, "Function", func);
+        obj = (YFunction) YFunction._FindFromCacheInContext(yctx, "Function", func);
         if (obj == null) {
             obj = new YFunction(yctx, func);
             YFunction._AddToCache("Function", func, obj);

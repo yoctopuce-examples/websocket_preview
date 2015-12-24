@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YMotor.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindMotor(), the high-level API for Motor functions
  *
@@ -868,7 +868,7 @@ public class YMotor extends YFunction
     public static YMotor FindMotorInContext(YAPIContext yctx,String func)
     {
         YMotor obj;
-        obj = (YMotor) YFunction._FindFromCache(yctx, "Motor", func);
+        obj = (YMotor) YFunction._FindFromCacheInContext(yctx, "Motor", func);
         if (obj == null) {
             obj = new YMotor(yctx, func);
             YFunction._AddToCache("Motor", func, obj);

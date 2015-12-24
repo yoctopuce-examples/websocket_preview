@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YLongitude.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindLongitude(), the high-level API for Longitude functions
  *
@@ -177,7 +177,7 @@ public class YLongitude extends YSensor
     public static YLongitude FindLongitudeInContext(YAPIContext yctx,String func)
     {
         YLongitude obj;
-        obj = (YLongitude) YFunction._FindFromCache(yctx, "Longitude", func);
+        obj = (YLongitude) YFunction._FindFromCacheInContext(yctx, "Longitude", func);
         if (obj == null) {
             obj = new YLongitude(yctx, func);
             YFunction._AddToCache("Longitude", func, obj);

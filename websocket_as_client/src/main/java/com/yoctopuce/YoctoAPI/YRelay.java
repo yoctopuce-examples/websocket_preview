@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YRelay.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindRelay(), the high-level API for Relay functions
  *
@@ -745,7 +745,7 @@ public class YRelay extends YFunction
     public static YRelay FindRelayInContext(YAPIContext yctx,String func)
     {
         YRelay obj;
-        obj = (YRelay) YFunction._FindFromCache(yctx, "Relay", func);
+        obj = (YRelay) YFunction._FindFromCacheInContext(yctx, "Relay", func);
         if (obj == null) {
             obj = new YRelay(yctx, func);
             YFunction._AddToCache("Relay", func, obj);

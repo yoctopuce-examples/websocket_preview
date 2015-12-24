@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YRefFrame.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindRefFrame(), the high-level API for RefFrame functions
  *
@@ -438,7 +438,7 @@ public class YRefFrame extends YFunction
     public static YRefFrame FindRefFrameInContext(YAPIContext yctx,String func)
     {
         YRefFrame obj;
-        obj = (YRefFrame) YFunction._FindFromCache(yctx, "RefFrame", func);
+        obj = (YRefFrame) YFunction._FindFromCacheInContext(yctx, "RefFrame", func);
         if (obj == null) {
             obj = new YRefFrame(yctx, func);
             YFunction._AddToCache("RefFrame", func, obj);

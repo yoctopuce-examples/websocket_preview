@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YNetwork.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindNetwork(), the high-level API for Network functions
  *
@@ -1657,7 +1657,7 @@ public class YNetwork extends YFunction
     public static YNetwork FindNetworkInContext(YAPIContext yctx,String func)
     {
         YNetwork obj;
-        obj = (YNetwork) YFunction._FindFromCache(yctx, "Network", func);
+        obj = (YNetwork) YFunction._FindFromCacheInContext(yctx, "Network", func);
         if (obj == null) {
             obj = new YNetwork(yctx, func);
             YFunction._AddToCache("Network", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YCarbonDioxide.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindCarbonDioxide(), the high-level API for CarbonDioxide functions
  *
@@ -297,7 +297,7 @@ public class YCarbonDioxide extends YSensor
     public static YCarbonDioxide FindCarbonDioxideInContext(YAPIContext yctx,String func)
     {
         YCarbonDioxide obj;
-        obj = (YCarbonDioxide) YFunction._FindFromCache(yctx, "CarbonDioxide", func);
+        obj = (YCarbonDioxide) YFunction._FindFromCacheInContext(yctx, "CarbonDioxide", func);
         if (obj == null) {
             obj = new YCarbonDioxide(yctx, func);
             YFunction._AddToCache("CarbonDioxide", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YDisplay.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: YDisplay.java 22543 2015-12-24 12:16:21Z seb $
  *
  * Implements yFindDisplay(), the high-level API for Display functions
  *
@@ -735,7 +735,7 @@ public class YDisplay extends YFunction
     public static YDisplay FindDisplayInContext(YAPIContext yctx,String func)
     {
         YDisplay obj;
-        obj = (YDisplay) YFunction._FindFromCache(yctx, "Display", func);
+        obj = (YDisplay) YFunction._FindFromCacheInContext(yctx, "Display", func);
         if (obj == null) {
             obj = new YDisplay(yctx, func);
             YFunction._AddToCache("Display", func, obj);

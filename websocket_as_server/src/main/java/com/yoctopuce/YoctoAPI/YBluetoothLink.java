@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YBluetoothLink.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindBluetoothLink(), the high-level API for BluetoothLink functions
  *
@@ -735,7 +735,7 @@ public class YBluetoothLink extends YFunction
     public static YBluetoothLink FindBluetoothLinkInContext(YAPIContext yctx,String func)
     {
         YBluetoothLink obj;
-        obj = (YBluetoothLink) YFunction._FindFromCache(yctx, "BluetoothLink", func);
+        obj = (YBluetoothLink) YFunction._FindFromCacheInContext(yctx, "BluetoothLink", func);
         if (obj == null) {
             obj = new YBluetoothLink(yctx, func);
             YFunction._AddToCache("BluetoothLink", func, obj);

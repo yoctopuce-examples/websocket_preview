@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YAltitude.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindAltitude(), the high-level API for Altitude functions
  *
@@ -332,7 +332,7 @@ public class YAltitude extends YSensor
     public static YAltitude FindAltitudeInContext(YAPIContext yctx,String func)
     {
         YAltitude obj;
-        obj = (YAltitude) YFunction._FindFromCache(yctx, "Altitude", func);
+        obj = (YAltitude) YFunction._FindFromCacheInContext(yctx, "Altitude", func);
         if (obj == null) {
             obj = new YAltitude(yctx, func);
             YFunction._AddToCache("Altitude", func, obj);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YCurrentLoopOutput.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindCurrentLoopOutput(), the high-level API for CurrentLoopOutput functions
  *
@@ -404,7 +404,7 @@ public class YCurrentLoopOutput extends YFunction
     public static YCurrentLoopOutput FindCurrentLoopOutputInContext(YAPIContext yctx,String func)
     {
         YCurrentLoopOutput obj;
-        obj = (YCurrentLoopOutput) YFunction._FindFromCache(yctx, "CurrentLoopOutput", func);
+        obj = (YCurrentLoopOutput) YFunction._FindFromCacheInContext(yctx, "CurrentLoopOutput", func);
         if (obj == null) {
             obj = new YCurrentLoopOutput(yctx, func);
             YFunction._AddToCache("CurrentLoopOutput", func, obj);

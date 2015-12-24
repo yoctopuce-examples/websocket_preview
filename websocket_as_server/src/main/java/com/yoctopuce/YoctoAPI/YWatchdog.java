@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YWatchdog.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindWatchdog(), the high-level API for Watchdog functions
  *
@@ -1047,7 +1047,7 @@ public class YWatchdog extends YFunction
     public static YWatchdog FindWatchdogInContext(YAPIContext yctx,String func)
     {
         YWatchdog obj;
-        obj = (YWatchdog) YFunction._FindFromCache(yctx, "Watchdog", func);
+        obj = (YWatchdog) YFunction._FindFromCacheInContext(yctx, "Watchdog", func);
         if (obj == null) {
             obj = new YWatchdog(yctx, func);
             YFunction._AddToCache("Watchdog", func, obj);

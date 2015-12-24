@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: YPowerOutput.java 22530 2015-12-24 10:52:06Z seb $
+ * $Id: pic24config.php 22503 2015-12-22 15:34:43Z mvuilleu $
  *
  * Implements FindPowerOutput(), the high-level API for PowerOutput functions
  *
@@ -259,7 +259,7 @@ public class YPowerOutput extends YFunction
     public static YPowerOutput FindPowerOutputInContext(YAPIContext yctx,String func)
     {
         YPowerOutput obj;
-        obj = (YPowerOutput) YFunction._FindFromCache(yctx, "PowerOutput", func);
+        obj = (YPowerOutput) YFunction._FindFromCacheInContext(yctx, "PowerOutput", func);
         if (obj == null) {
             obj = new YPowerOutput(yctx, func);
             YFunction._AddToCache("PowerOutput", func, obj);
