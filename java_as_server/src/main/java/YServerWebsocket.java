@@ -15,7 +15,7 @@ public class YServerWebsocket
     @OnOpen
     public void onOpen(final Session session)
     {
-        final String desc = "Connection " + session.getId();
+        // log onOpen for debug purpose
         System.out.println(session.getId() + " has open a connection");
 
         Thread thread = new Thread(new Runnable()
@@ -23,33 +23,57 @@ public class YServerWebsocket
             @Override
             public void run()
             {
+
+                // since all connection use the same process create a private context
                 YAPIContext yctx = new YAPIContext();
                 try {
+                    // register the YoctoHub/VirtualHub that start the connection
                     yctx.RegisterHubCallback(session);
 
-                    System.out.println("Device list_");
+                    // list all devices connected on this hub (only for debug propose)
+                    System.out.println("Device list:");
                     YModule module = YModule.FirstModule(yctx);
                     while (module != null) {
                         System.out.println("   " + module.get_serialNumber() + " (" + module.get_productName() + ")");
-
                         module = module.nextModule();
                     }
-                    YRelay relay = YRelay.FirstRelay(yctx);
-                    while (relay != null) {
-                        relay.set_state(YRelay.STATE_A);
-                        relay.set_state(YRelay.STATE_B);
-                        relay = relay.nextRelay();
+
+                    // play a bit with relay output :-)
+                    try {
+                        YRelay relay = YRelay.FirstRelay(yctx);
+                        if (relay != null) {
+                            relay.set_state(YRelay.STATE_A);
+                            Thread.sleep(500);
+                            relay.set_state(YRelay.STATE_B);
+                            Thread.sleep(250);
+                            relay.set_state(YRelay.STATE_A);
+                            Thread.sleep(250);
+                            relay.set_state(YRelay.STATE_B);
+                            Thread.sleep(500);
+                            relay.set_state(YRelay.STATE_A);
+                            Thread.sleep(1000);
+                            relay.set_state(YRelay.STATE_B);
+                            Thread.sleep(500);
+                            relay.set_state(YRelay.STATE_A);
+                            Thread.sleep(1000);
+                            relay.set_state(YRelay.STATE_B);
+                        } else {
+                            System.out.println("No Relay connected");
+                        }
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
+
                 } catch (YAPI_Exception ex) {
+                    System.out.println(" error (" + ex.getLocalizedMessage() + ")");
                     ex.printStackTrace();
-                    System.out.println(desc + " error (" + ex.getLocalizedMessage() + ")");
-                    return;
                 }
+                // no not forget to FreeAPI to ensure that all pending operation
+                // are finished and freed
                 yctx.FreeAPI();
             }
-        }
-
-                , " Thread " + desc);
+        });
         thread.start();
     }
 
@@ -57,12 +81,14 @@ public class YServerWebsocket
     @OnClose
     public void onClose(Session session, CloseReason closeReason)
     {
+        // log onClose for debug purpose
         System.out.println(session.getId() + " has close a connection");
     }
 
     @OnError
     public void onError(Session session, Throwable throwable)
     {
+        // log onError for debug purpose
         System.out.println(session.getId() + " error : " + throwable.getMessage());
         throwable.printStackTrace();
     }
