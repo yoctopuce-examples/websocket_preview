@@ -3,7 +3,7 @@ Preview of the Yoctopuce Java library with WebSocket support
 
 ## License information
 
-Copyright (C) 2011 and beyond by Yoctopuce Sarl, Switzerland.
+Copyright (C) 2015 and beyond by Yoctopuce Sarl, Switzerland.
 
 Yoctopuce Sarl (hereafter Licensor) grants to you a perpetual
 non-exclusive license to use, modify, copy and integrate this
@@ -59,7 +59,7 @@ $ mvn exec:java -Dexec.mainClass="com.yoctopuce.demo.App"
 
 ## WebSocket as server
 
-This is a simple server application that must be deployed on a Java EE 7–compliant application servers (Tomcat 7, Tomcat 8, etc...)
+This is a simple server application that must be deployed on a Java EE 7â€“compliant application servers (Tomcat 7, Tomcat 8, etc...)
 The application implement a ServerEndpoint that follow the JSR 356 specification and wait for a incoming connection of a YoctoHub/VirtualHub.
 When an incomming connection occur, the applicaiton will create a new thread that will ist all Yoctopuce devices and toggle relay output.
 
