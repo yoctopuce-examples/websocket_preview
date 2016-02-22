@@ -55,6 +55,5 @@ public class App
         // no not forget to FreeAPI to ensure that all pending operation
         // are finished and freed
         YAPI.FreeAPI();
-
     }
 }

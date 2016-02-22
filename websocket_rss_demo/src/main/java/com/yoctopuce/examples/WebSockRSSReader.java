@@ -7,18 +7,15 @@
 
     import com.yoctopuce.YoctoAPI.*;
 
-    import javax.websocket.Session;
-    import java.text.SimpleDateFormat;
-    import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
     public class WebSockRSSReader implements Runnable
     {
 
         private static final SimpleDateFormat ft = new SimpleDateFormat("d MMM");
 
-        private YAPIContext _yctx;
-        private final Session _session;
-
+        private final YAPIContext _yctx;
         private RSSReader _rssReader;
         private ArrayList<String> _rssFeeds = new ArrayList<>();
         private ArrayList<ArrayList<RSSItem>> _rssFeedsCache;
@@ -27,9 +24,9 @@
         private int _itemIndex;
         private YDisplay _display;
 
-        public WebSockRSSReader(Session session)
+        public WebSockRSSReader(YAPIContext yctx)
         {
-            _session = session;
+            _yctx = yctx;
             _rssReader = new RSSReader();
             _rssFeeds.add("http://www.yoctopuce.com/EN/rss.xml");
             _rssFeeds.add("http://rss.slashdot.org/Slashdot/slashdotMain");
@@ -83,7 +80,6 @@
         private boolean checkForNewArticles()
         {
             if (_rssCacheExpiration < System.currentTimeMillis()) {
-                System.out.println("Refresh Feeds");
                 // show "Loading..." on YoctoDisplay
                 try {
                     int w = _display.get_displayWidth();
@@ -209,13 +205,12 @@
 
         public void run()
         {
-            System.out.println("started");
-            _yctx = new YAPIContext();
+
             try {
-                _yctx.RegisterHubWebSocketCallback(_session);
+                _yctx.UpdateDeviceList();
                 setupYoctoDisplay();
                 // run while WebSocket is connected
-                while (_session.isOpen()) {
+                while (true) {
                     if (checkForNewArticles()) {
                         refreshDisplay();
                     }
@@ -226,7 +221,6 @@
             }
             _yctx.FreeAPI();
 
-            System.out.println("done.");
         }
 
 

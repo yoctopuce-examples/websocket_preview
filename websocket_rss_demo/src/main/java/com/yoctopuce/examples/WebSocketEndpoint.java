@@ -1,5 +1,8 @@
 package com.yoctopuce.examples;
 
+import com.yoctopuce.YoctoAPI.YAPIContext;
+import com.yoctopuce.YoctoAPI.YAPI_Exception;
+
 import javax.websocket.OnError;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -13,7 +16,15 @@ public class WebSocketEndpoint
     public void onOpen(final Session session)
     {
         // on each connection start a new thread that will execute the code
-        Thread thread = new Thread(new WebSockRSSReader(session), " Thread " +  session.getId());
+
+        YAPIContext yctx = new YAPIContext();
+        try {
+            yctx.PreregisterHubWebSocketCallback(session);
+        } catch (YAPI_Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        Thread thread = new Thread(new WebSockRSSReader(yctx), " Thread " +  session.getId());
         thread.start();
     }
 

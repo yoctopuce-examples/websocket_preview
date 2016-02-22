@@ -15,6 +15,14 @@ public class YServerWebsocket
     {
         // log onOpen for debug purpose
         System.out.println(session.getId() + " has open a connection");
+        // since all connection use the same process create a private context
+        final YAPIContext yctx = new YAPIContext();
+        try {
+            yctx.PreregisterHubWebSocketCallback(session);
+        } catch (YAPI_Exception e) {
+            e.printStackTrace();
+            return;
+        }
 
         Thread thread = new Thread(new Runnable()
         {
@@ -22,11 +30,10 @@ public class YServerWebsocket
             public void run()
             {
 
-                // since all connection use the same process create a private context
-                YAPIContext yctx = new YAPIContext();
+
                 try {
                     // register the YoctoHub/VirtualHub that start the connection
-                    yctx.RegisterHubWebSocketCallback(session);
+                    yctx.UpdateDeviceList();
 
                     // list all devices connected on this hub (only for debug propose)
                     System.out.println("Device list:");
@@ -83,12 +90,5 @@ public class YServerWebsocket
         System.out.println(session.getId() + " has close a connection");
     }
 
-    @OnError
-    public void onError(Session session, Throwable throwable)
-    {
-        // log onError for debug purpose
-        System.out.println(session.getId() + " error : " + throwable.getMessage());
-        throwable.printStackTrace();
-    }
 
 }
