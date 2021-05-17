@@ -1,5 +1,5 @@
-Preview of the Yoctopuce Java library with WebSocket support
-============================================================
+Deprecated: Preview of the Yoctopuce Java library with WebSocket support
+========================================================================
 
 ## License information
 
